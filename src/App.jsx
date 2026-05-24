@@ -6,9 +6,17 @@ function saveData(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
 const KEYS  = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const KEYS_IT = ["Do","Do#","Re","Re#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
 const MODES = ["Maj","min","Dom7","min7","Maj7","sus2","sus4"];
 const FREE_LIMIT = 1;
 const FREE_SONGS_LIMIT = 20;
+
+// Converti chiave inglese → italiana e viceversa
+function displayKey(key, useItalian) {
+  if (!useItalian) return key;
+  const i = KEYS.indexOf(key);
+  return i !== -1 ? KEYS_IT[i] : key;
+}
 
 const TAG_PRESETS = [
   { id:"rock",    label:"Rock",     color:"#e8604a" },
@@ -44,23 +52,24 @@ function buildPrintHTML(setlist) {
       return tp?`<span style="background:${tp.color}22;color:${tp.color};border:1px solid ${tp.color}55;border-radius:12px;padding:1px 8px;font-size:11px;margin-right:4px">${tp.label}</span>`:"";
     }).join("");
     return `<tr>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#888;font-weight:700;width:32px">${i+1}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;font-weight:600">${s.title}${tags?`<br><div style="margin-top:4px">${tags}</div>`:""}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:center;font-weight:700;color:#c8a020">${s.key} ${s.mode}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:center;color:#666">${s.bpm}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #eee;text-align:center;color:#666">${s.duration}</td>
-      ${s.notes?`<td style="padding:10px 8px;border-bottom:1px solid #eee;font-size:12px;color:#888">${s.notes}</td>`:`<td style="border-bottom:1px solid #eee"></td>`}
+      <td style="padding:10px 8px;border-bottom:1px solid #ddd;color:#000;font-weight:700;width:32px">${i+1}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #ddd;font-weight:600;color:#000">${s.title}${tags?`<br><div style="margin-top:4px">${tags}</div>`:""}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #ddd;text-align:center;font-weight:700;color:#000">${s.key} ${s.mode}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #ddd;text-align:center;color:#000">${s.bpm}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #ddd;text-align:center;color:#000">${s.duration}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #ddd;font-size:12px;color:#000;min-width:200px">${s.notes||""}</td>
     </tr>`;
   }).join("");
   return `<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>${setlist.name}</title>
   <style>
-    body{font-family:'Georgia',serif;max-width:800px;margin:40px auto;padding:0 20px;color:#1a1a1a}
-    h1{font-size:2.2rem;margin:0 0 6px;border-bottom:3px solid #c8a020;padding-bottom:10px}
-    .meta{color:#666;font-size:.9rem;margin-bottom:28px;display:flex;gap:20px}
+    body{font-family:'Georgia',serif;max-width:800px;margin:40px auto;padding:0 20px;color:#000}
+    h1{font-size:2.2rem;margin:0 0 6px;border-bottom:3px solid #c8a020;padding-bottom:10px;color:#000}
+    .meta{color:#000;font-size:.9rem;margin-bottom:28px;display:flex;gap:20px}
     table{width:100%;border-collapse:collapse}
-    th{text-align:left;padding:8px;border-bottom:2px solid #222;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:#555}
-    .footer{margin-top:20px;font-size:.85rem;color:#888;text-align:right;border-top:1px solid #ddd;padding-top:10px}
+    th{text-align:left;padding:8px;border-bottom:2px solid #000;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:#000}
+    td{color:#000}
+    .footer{margin-top:20px;font-size:.85rem;color:#000;text-align:right;border-top:1px solid #ddd;padding-top:10px}
     @media print{body{margin:20px}}
   </style></head><body>
   <h1>${setlist.name}</h1>
@@ -72,7 +81,12 @@ function buildPrintHTML(setlist) {
   </div>
   <table>
     <thead><tr>
-      <th>#</th><th>Brano</th><th>Tonalità</th><th>BPM</th><th>Durata</th><th>Note</th>
+      <th style="text-align:left">#</th>
+      <th style="text-align:left">Brano</th>
+      <th style="text-align:center">🎵</th>
+      <th style="text-align:center">♩</th>
+      <th style="text-align:center">⏱</th>
+      <th style="text-align:left;min-width:200px">Note</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>
@@ -295,7 +309,7 @@ function Metronome({ bpm: initialBpm }) {
 }
 
 // ── STAGE MODE ────────────────────────────────────────────────────────────────
-function StageMode({ setlist, onClose }) {
+function StageMode({ setlist, onClose, useItalian }) {
   const [idx,setIdx]=useState(0);
   const [elapsed,setElapsed]=useState(0);
   const [running,setRunning]=useState(false);
@@ -318,7 +332,7 @@ function StageMode({ setlist, onClose }) {
       <div className="stage-count">{idx+1} / {setlist.songs.length}</div>
       <div className="stage-main">
         <div className="stage-song-title">{song?.title}</div>
-        <div className="stage-key">{song?.key} {song?.mode}</div>
+        <div className="stage-key">{displayKey(song?.key, useItalian)} {song?.mode}</div>
         <div className="stage-bpm">♩ {song?.bpm} BPM</div>
         {song?.tags?.length>0&&<div className="stage-tags">{song.tags.map(t=><TagPill key={t} tagId={t}/>)}</div>}
         <div className={`stage-notes${song?.notes?"":" stage-notes-empty"}`}>
@@ -338,7 +352,7 @@ function StageMode({ setlist, onClose }) {
         <button key={s.id} className={`stage-list-item${i===idx?" active":""}${i<idx?" done":""}`} onClick={()=>goTo(i)}>
           <span className="sli-num">{i+1}</span>
           <span className="sli-title">{s.title}</span>
-          <span className="sli-key">{s.key} {s.mode}</span>
+          <span className="sli-key">{displayKey(s.key, useItalian)} {s.mode}</span>
         </button>
       ))}</div>
       <button className="stage-metro-toggle" onClick={()=>setShowMetro(v=>!v)}><IcMetro size={16}/>{showMetro?"Nascondi":"Metronomo"}</button>
@@ -486,8 +500,78 @@ function Library({ library, onUpdate, onClose, onAddToSetlist }) {
   );
 }
 
+// ── MP3 PLAYER ────────────────────────────────────────────────────────────────
+const IcMp3 = ({size=18}) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+  </svg>
+);
+
+function MP3Player({ song, onUpdate }) {
+  const audioRef = useRef(null);
+  const fileRef  = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+
+  useEffect(() => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.load(); setPlaying(false); setProgress(0); setDuration(0); }
+  }, [song.mp3Data]);
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (playing) { audioRef.current.pause(); setPlaying(false); }
+    else { audioRef.current.play(); setPlaying(true); }
+  };
+
+  const openExternal = () => {
+    if (!song.mp3Data) return;
+    const a = document.createElement("a");
+    a.href = song.mp3Data; a.target = "_blank"; a.click();
+  };
+
+  const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+  return (
+    <div className="mp3-player">
+      {song.mp3Data && (
+        <audio ref={audioRef} src={song.mp3Data}
+          onTimeUpdate={e=>setProgress(e.target.currentTime)}
+          onLoadedMetadata={e=>setDuration(e.target.duration)}
+          onEnded={()=>{setPlaying(false);setProgress(0);}}/>
+      )}
+      <div className="mp3-player-top">
+        <IcMp3 size={14}/>
+        <span className="mp3-name">{song.mp3Name||"Nessun MP3 allegato"}</span>
+        {song.mp3Data ? <>
+          <button className="mp3-play-btn" onClick={togglePlay}>
+            {playing ? <IcPause size={15}/> : <IcPlay size={15}/>}
+          </button>
+          <span className="mp3-time">{fmt(progress)}{duration>0&&` / ${fmt(duration)}`}</span>
+          <button className="btn-text" onClick={openExternal}>↗ Esterno</button>
+          <button className="btn-text red" onClick={()=>onUpdate({...song,mp3Name:null,mp3Data:null})}>Rimuovi</button>
+        </> : (
+          <button className="btn-text" onClick={()=>fileRef.current.click()}>+ Allega MP3</button>
+        )}
+      </div>
+      {song.mp3Data && duration>0 && (
+        <input type="range" className="mp3-progress" min={0} max={duration} step={0.1} value={progress}
+          onChange={e=>{ if(audioRef.current){ audioRef.current.currentTime=+e.target.value; setProgress(+e.target.value); }}}/>
+      )}
+      <input ref={fileRef} type="file" accept="audio/*" style={{display:"none"}}
+        onChange={e=>{
+          const file=e.target.files[0]; if(!file) return;
+          const r=new FileReader();
+          r.onload=ev=>onUpdate({...song,mp3Name:file.name,mp3Data:ev.target.result});
+          r.readAsDataURL(file); e.target.value="";
+        }}/>
+    </div>
+  );
+}
+
 // ── SONG ROW ──────────────────────────────────────────────────────────────────
-function SongRow({ song, index, onUpdate, onDelete, onOpenPDF, isPro, onShowProBanner,
+function SongRow({ song, index, onUpdate, onDelete, onOpenPDF, isPro, onShowProBanner, useItalian,
                    dragging, onDragStart, onDragOver, onDrop, onDragEnd }) {
   const [expanded,setExpanded]=useState(false);
   const fileRef=useRef();
@@ -503,16 +587,27 @@ function SongRow({ song, index, onUpdate, onDelete, onOpenPDF, isPro, onShowProB
           {song.tags?.length>0&&<div className="song-inline-tags">{song.tags.map(t=><TagPill key={t} tagId={t}/>)}</div>}
         </div>
         <div className="song-meta">
-          <select value={song.key} onChange={e=>onUpdate({...song,key:e.target.value})}>{KEYS.map(k=><option key={k}>{k}</option>)}</select>
+          <select value={song.key} onChange={e=>onUpdate({...song,key:e.target.value})}>
+            {KEYS.map((k,i)=><option key={k} value={k}>{useItalian ? KEYS_IT[i] : k}</option>)}
+          </select>
           <select value={song.mode} onChange={e=>onUpdate({...song,mode:e.target.value})}>{MODES.map(m=><option key={m}>{m}</option>)}</select>
-          <input type="number" className="bpm-input" value={song.bpm} onChange={e=>onUpdate({...song,bpm:+e.target.value})} placeholder="BPM"/>
-          <input className="dur-input" value={song.duration} onChange={e=>onUpdate({...song,duration:e.target.value})} placeholder="0:00"/>
+          <div className="meta-icon-input">
+            <IcMusic size={13}/>
+            <input type="number" className="bpm-input" value={song.bpm} onChange={e=>onUpdate({...song,bpm:+e.target.value})} placeholder="BPM"/>
+          </div>
+          <div className="meta-icon-input">
+            <IcClock size={13}/>
+            <input className="dur-input" value={song.duration} onChange={e=>onUpdate({...song,duration:e.target.value})} placeholder="0:00"/>
+          </div>
         </div>
         <div className="song-actions">
+          <button className={`btn-icon btn-mp3${song.mp3Name?" has-mp3":""}`}
+            title={song.mp3Name||"Allega MP3"} onClick={()=>setExpanded(true)}>
+            <IcMp3 size={16}/>
+          </button>
           {song.pdfName
             ?<button className="btn-icon btn-pdf has-pdf" title={`Apri: ${song.pdfName}`} onClick={()=>onOpenPDF(song)}><IcPDF/></button>
-            :<button className="btn-icon btn-pdf" title="Allega PDF"
-                onClick={()=>fileRef.current.click()}><IcPDF/></button>
+            :<button className="btn-icon btn-pdf" title="Allega PDF" onClick={()=>fileRef.current.click()}><IcPDF/></button>
           }
           <button className="btn-icon" onClick={()=>setExpanded(v=>!v)}><IcEdit/></button>
           <button className="btn-icon btn-delete" onClick={()=>onDelete(song.id)}><IcTrash/></button>
@@ -524,6 +619,7 @@ function SongRow({ song, index, onUpdate, onDelete, onOpenPDF, isPro, onShowProB
         <div className="song-notes">
           <TagPicker selected={song.tags||[]} onChange={tags=>onUpdate({...song,tags})}/>
           <textarea value={song.notes} rows={2} onChange={e=>onUpdate({...song,notes:e.target.value})} placeholder="Note, intro, accordatura speciale…"/>
+          <MP3Player song={song} onUpdate={onUpdate}/>
           {song.pdfName&&(
             <div className="pdf-badge">
               <IcPDF/><span>{song.pdfName}</span>
@@ -728,7 +824,7 @@ function UpgradeModal({ onClose }) {
 }
 
 // ── SETLIST EDITOR ────────────────────────────────────────────────────────────
-function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, isPro }) {
+function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, isPro, useItalian, onToggleItalian }) {
   const [dragIdx,setDragIdx]=useState(null);
   const [overIdx,setOverIdx]=useState(null);
   const [viewingPDF,setViewingPDF]=useState(null);
@@ -765,7 +861,7 @@ function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, is
   const totalMin=setlist.songs.reduce((acc,s)=>{const[m,sec]=(s.duration||"0:00").split(":").map(Number);return acc+(m||0)+(sec||0)/60;},0);
   const totalStr=`${Math.floor(totalMin)}:${String(Math.round((totalMin%1)*60)).padStart(2,"0")}`;
 
-  if(stageMode)return <StageMode setlist={setlist} onClose={()=>setStageMode(false)}/>;
+  if(stageMode)return <StageMode setlist={setlist} onClose={()=>setStageMode(false)} useItalian={useItalian}/>;
 
   return (
     <div className="editor-page">
@@ -780,6 +876,9 @@ function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, is
         <div className="editor-header-top">
           <button className="btn-back" onClick={onBack}><IcChevL/> Scalette</button>
           <div className="editor-header-actions">
+            <button className="btn-note-toggle" onClick={onToggleItalian} title="Cambia notazione">
+              {useItalian ? "Do Re Mi" : "C D E"}
+            </button>
             <button className="btn-icon-label" onClick={()=>setShowLib(true)}><IcBook size={15}/> Libreria</button>
             <button className="btn-icon-label" onClick={()=>setShowHistory(true)}>
               <IcHistory size={15}/> Storico
@@ -814,7 +913,7 @@ function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, is
 
       <div className="songs-list">
         {setlist.songs.map((song,i)=>(
-          <SongRow key={song.id} song={song} index={i} isPro={isPro}
+          <SongRow key={song.id} song={song} index={i} isPro={isPro} useItalian={useItalian}
             onShowProBanner={()=>setLimitWarning(true)}
             dragging={overIdx===i&&dragIdx!==i}
             onUpdate={updateSong} onDelete={deleteSong}
@@ -839,6 +938,7 @@ export default function App() {
   const [showUpgrade,setShowUpgrade]=useState(false);
   const [showLibGlobal,setShowLibGlobal]=useState(false);
   const [sharedSetlist,setSharedSetlist]=useState(()=>parseSharedSetlist());
+  const [useItalian,setUseItalian]=useState(false);
 
   useEffect(()=>{saveData(data);},[data]);
 
@@ -864,12 +964,16 @@ export default function App() {
           {showLibGlobal&&<Library library={library} onUpdate={updateLibrary} onClose={()=>setShowLibGlobal(false)}/>}
           {active?(
             <SetlistEditor setlist={active} onUpdate={updateSetlist} onBack={()=>setActiveId(null)}
-              library={library} onUpdateLibrary={updateLibrary} isPro={isPro}/>
+              library={library} onUpdateLibrary={updateLibrary} isPro={isPro} 
+              useItalian={useItalian} onToggleItalian={()=>setUseItalian(v=>!v)}/>
           ):(
             <>
               <header className="app-header">
                 <div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div>
                 <div className="header-right">
+                  <button className="btn-note-toggle" onClick={()=>setUseItalian(v=>!v)} title="Cambia notazione">
+                    {useItalian ? "Do Re Mi" : "C D E"}
+                  </button>
                   <button className="btn-icon-label" onClick={()=>setShowLibGlobal(true)}>
                     <IcBook size={15}/> Libreria <span className="lib-count">{library.length}</span>
                   </button>
@@ -928,7 +1032,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .logo b{color:var(--accent)}
 .header-right{display:flex;align-items:center;gap:10px}
 .btn-pro-badge{display:flex;align-items:center;gap:6px;background:rgba(232,200,74,.12);color:var(--accent);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer}
-.lib-count{background:rgba(74,173,232,.2);color:var(--accent2);border-radius:10px;padding:1px 7px;font-size:.75rem;font-weight:700}
+.btn-note-toggle{display:flex;align-items:center;gap:6px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.03em}
+.btn-note-toggle:hover{color:var(--accent2);border-color:var(--accent2);background:rgba(74,173,232,.08)}
 .home-hero{padding:32px 0 36px}
 .home-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,7vw,3.2rem);line-height:1.1;margin-bottom:12px}
 .home-hero p{color:var(--muted);font-size:1rem;max-width:420px;line-height:1.6}
@@ -1000,7 +1105,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .song-inline-tags{display:flex;flex-wrap:wrap;gap:4px}
 .song-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .song-meta select,.bpm-input,.dur-input{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;font-size:.8rem;outline:none}
-.bpm-input{width:60px}.dur-input{width:54px}
+.meta-icon-input{display:flex;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--muted)}
+.meta-icon-input input{background:none;border:none;color:var(--text);font-size:.8rem;outline:none;width:100%}
+.bpm-input{width:44px}.dur-input{width:38px}
 .song-actions{display:flex;gap:4px;margin-left:auto}
 .btn-icon{background:none;border:1px solid transparent;color:var(--muted);border-radius:8px;padding:5px;cursor:pointer;transition:all .15s;display:flex;align-items:center}
 .btn-icon:hover{background:var(--surface);color:var(--text);border-color:var(--border)}
@@ -1154,7 +1261,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .pm-footer{font-size:.75rem;color:var(--muted);text-align:right;padding-top:10px;border-top:1px solid var(--border)}
 .pm-actions{display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
 .pm-actions .btn-upgrade{display:flex;align-items:center;gap:7px;flex:1}
-.limit-banner{display:flex;align-items:center;gap:12px;background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.35);border-radius:12px;padding:12px 16px;margin-bottom:16px;flex-wrap:wrap}
+.btn-mp3{color:var(--muted)}
+.btn-mp3.has-mp3{color:#a78bfa}
+.btn-mp3.has-mp3:hover{background:rgba(167,139,250,.12)}
+.mp3-player{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+.mp3-player-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mp3-name{flex:1;font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:80px}
+.mp3-play-btn{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#a78bfa;border:none;color:#fff;cursor:pointer;flex-shrink:0;transition:opacity .2s}
+.mp3-play-btn:hover{opacity:.85}
+.mp3-time{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.mp3-progress{width:100%;accent-color:#a78bfa;cursor:pointer}
+display:flex;align-items:center;gap:12px;background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.35);border-radius:12px;padding:12px 16px;margin-bottom:16px;flex-wrap:wrap}
 .limit-banner span{flex:1;font-size:.85rem;color:var(--accent);min-width:180px}
 .limit-banner-pro{background:var(--accent);color:#0d0f14;border:none;border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
 .limit-banner-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:0 4px;line-height:1}
