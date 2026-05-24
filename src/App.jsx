@@ -473,11 +473,18 @@ function Library({ library, onUpdate, onClose, onAddToSetlist }) {
                     <input className="lib-edit-title" value={song.title} onChange={e=>updateSong({...song,title:e.target.value})} placeholder="Titolo"/>
                     <select value={song.key} onChange={e=>updateSong({...song,key:e.target.value})}>{KEYS.map(k=><option key={k}>{k}</option>)}</select>
                     <select value={song.mode} onChange={e=>updateSong({...song,mode:e.target.value})}>{MODES.map(m=><option key={m}>{m}</option>)}</select>
-                    <input type="number" className="bpm-input" value={song.bpm} onChange={e=>updateSong({...song,bpm:+e.target.value})} placeholder="BPM"/>
-                    <input className="dur-input" value={song.duration} onChange={e=>updateSong({...song,duration:e.target.value})} placeholder="0:00"/>
+                    <div className="meta-icon-input">
+                      <IcMusic size={13}/>
+                      <input type="number" className="bpm-input" value={song.bpm} onChange={e=>updateSong({...song,bpm:+e.target.value})} placeholder="BPM"/>
+                    </div>
+                    <div className="meta-icon-input">
+                      <IcClock size={13}/>
+                      <input className="dur-input" value={song.duration} onChange={e=>updateSong({...song,duration:e.target.value})} placeholder="0:00"/>
+                    </div>
                   </div>
                   <TagPicker selected={song.tags||[]} onChange={tags=>updateSong({...song,tags})}/>
-                  <textarea value={song.notes} rows={2} placeholder="Note…" onChange={e=>updateSong({...song,notes:e.target.value})} className="lib-edit-notes"/>
+                  <textarea value={song.notes} rows={3} placeholder="Note…" onChange={e=>updateSong({...song,notes:e.target.value})} className="lib-edit-notes"/>
+                  <MP3Player song={song} onUpdate={updateSong}/>
                   <div className="lib-pdf-row">
                     {song.pdfName
                       ?<div className="pdf-badge"><IcPDF/><span>{song.pdfName}</span>
@@ -1153,8 +1160,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .btn-lib-add:hover{background:rgba(74,173,232,.22)}
 .lib-song-edit{border-top:1px solid var(--border);padding:12px 14px;display:flex;flex-direction:column;gap:10px}
 .lib-edit-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.lib-edit-title{flex:1 1 160px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:.9rem;outline:none}
-.lib-edit-notes{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:.85rem;resize:vertical;outline:none;width:100%}
+.lib-edit-title{flex:0 1 160px;min-width:100px;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:5px 10px;font-size:.9rem;outline:none}
+.lib-edit-notes{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font-size:.85rem;resize:vertical;outline:none;width:100%;min-height:80px}
 .lib-pdf-row{display:flex;align-items:center;gap:8px}
 .lib-footer{padding:12px 20px;border-top:1px solid var(--border);font-size:.8rem;color:var(--muted);text-align:center}
 .history-modal{max-width:520px;text-align:left;padding:28px}
