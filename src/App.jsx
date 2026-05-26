@@ -40,7 +40,7 @@ function transposeKey(key, semitones) {
   return CHROMATIC[(i + semitones + 12) % 12];
 }
 
-function buildPrintHTML(setlist) {
+function buildPrintHTML(setlist, useItalian=false) {
   const totalMin = setlist.songs.reduce((acc,s)=>{
     const[m,sec]=(s.duration||"0:00").split(":").map(Number);
     return acc+(m||0)+(sec||0)/60;
@@ -54,7 +54,7 @@ function buildPrintHTML(setlist) {
     return `<tr>
       <td style="padding:10px 8px;border-bottom:1px solid #ddd;color:#000;font-weight:700;width:32px">${i+1}</td>
       <td style="padding:10px 8px;border-bottom:1px solid #ddd;font-weight:600;color:#000">${s.title}${tags?`<br><div style="margin-top:4px">${tags}</div>`:""}</td>
-      <td style="padding:10px 8px;border-bottom:1px solid #ddd;text-align:center;font-weight:700;color:#000">${s.key} ${s.mode}</td>
+      <td style="padding:10px 8px;border-bottom:1px solid #ddd;text-align:center;font-weight:700;color:#000">${displayKey(s.key, useItalian)} ${s.mode}</td>
       <td style="padding:10px 8px;border-bottom:1px solid #ddd;text-align:center;color:#000">${s.bpm}</td>
       <td style="padding:10px 8px;border-bottom:1px solid #ddd;text-align:center;color:#000">${s.duration}</td>
       <td style="padding:10px 8px;border-bottom:1px solid #ddd;font-size:12px;color:#000;min-width:200px">${s.notes||""}</td>
@@ -641,11 +641,11 @@ function SongRow({ song, index, onUpdate, onDelete, onOpenPDF, isPro, onShowProB
 }
 
 // ── PRINT MODAL ───────────────────────────────────────────────────────────────
-function PrintModal({ setlist, onClose }) {
+function PrintModal({ setlist, onClose, useItalian=false }) {
   const totalMin=setlist.songs.reduce((acc,s)=>{const[m,sec]=(s.duration||"0:00").split(":").map(Number);return acc+(m||0)+(sec||0)/60;},0);
   const totalStr=`${Math.floor(totalMin)}:${String(Math.round((totalMin%1)*60)).padStart(2,"0")}`;
   const doPrint=()=>{
-    const html=buildPrintHTML(setlist);
+    const html=buildPrintHTML(setlist, useItalian);
     const blob=new Blob([html],{type:"text/html;charset=utf-8"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
@@ -668,7 +668,14 @@ function PrintModal({ setlist, onClose }) {
             </div>
           </div>
           <table className="pm-table">
-            <thead><tr><th>#</th><th>Brano</th><th>Tonalità</th><th>BPM</th><th>Durata</th><th>Note</th></tr></thead>
+            <thead><tr>
+              <th style={{textAlign:"left"}}>#</th>
+              <th style={{textAlign:"left"}}>Brano</th>
+              <th style={{textAlign:"center"}}>🎵</th>
+              <th style={{textAlign:"center"}}>♩</th>
+              <th style={{textAlign:"center"}}>⏱</th>
+              <th style={{textAlign:"left",minWidth:200}}>Note</th>
+            </tr></thead>
             <tbody>{setlist.songs.map((s,i)=>(
               <tr key={s.id}>
                 <td className="pm-num">{i+1}</td>
@@ -676,7 +683,7 @@ function PrintModal({ setlist, onClose }) {
                   {s.title}
                   {s.tags?.length>0&&<div className="pm-tags">{s.tags.map(t=>{const tp=TAG_PRESETS.find(x=>x.id===t);return tp?<span key={t} className="pm-tag" style={{background:tp.color+"22",color:tp.color,border:`1px solid ${tp.color}55`}}>{tp.label}</span>:null;})}</div>}
                 </td>
-                <td className="pm-key">{s.key} {s.mode}</td>
+                <td className="pm-key">{displayKey(s.key, useItalian)} {s.mode}</td>
                 <td className="pm-bpm">{s.bpm}</td>
                 <td className="pm-dur">{s.duration}</td>
                 <td className="pm-notes">{s.notes||""}</td>
@@ -877,7 +884,7 @@ function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, is
       {showHistory&&<HistoryModal setlist={setlist} onUpdate={onUpdate} onClose={()=>setShowHistory(false)}/>}
       {showTranspose&&<TransposeModal setlist={setlist} onUpdate={onUpdate} onClose={()=>setShowTranspose(false)}/>}
       {showShare&&<ShareModal setlist={setlist} onClose={()=>setShowShare(false)}/>}
-      {showPrint&&<PrintModal setlist={setlist} onClose={()=>setShowPrint(false)}/>}
+      {showPrint&&<PrintModal setlist={setlist} onClose={()=>setShowPrint(false)} useItalian={useItalian}/>}
 
       <div className="editor-header">
         <div className="editor-header-top">
