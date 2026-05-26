@@ -456,7 +456,7 @@ function Library({ library, onUpdate, onClose, onAddToSetlist, isPro }) {
               </div>
             </div>
             <div className="limit-banner-right">
-              <button className="limit-banner-pro">PRO — €4,99</button>
+              <button className="limit-banner-pro">PRO — €39,99</button>
               <button className="limit-banner-close" onClick={()=>setLibWarning(false)}>×</button>
             </div>
           </div>
@@ -857,7 +857,7 @@ function UpgradeModal({ onClose }) {
           <li>✓ Backup cloud multi-dispositivo</li>
           <li>✓ Tutti gli aggiornamenti futuri</li>
         </ul>
-        <div className="pro-price">€4,99 <span>una tantum</span></div>
+        <div className="pro-price">€39,99 <span>una tantum</span></div>
         <button className="btn-upgrade">Acquista PRO lifetime</button>
         <p className="modal-note">Demo: il pagamento non è ancora attivo.</p>
       </div>
@@ -1019,6 +1019,7 @@ export default function App() {
               <header className="app-header">
                 <div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div>
                 <div className="header-right">
+                  <a className="btn-info-link" href="/landing.html" target="_blank" rel="noopener">ℹ️ Info</a>
                   <button className="btn-note-toggle" onClick={()=>setUseItalian(v=>!v)} title="Cambia notazione">
                     {useItalian ? "Do Re Mi" : "C D E"}
                   </button>
@@ -1080,7 +1081,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .logo b{color:var(--accent)}
 .header-right{display:flex;align-items:center;gap:10px}
 .btn-pro-badge{display:flex;align-items:center;gap:6px;background:rgba(232,200,74,.12);color:var(--accent);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer}
-.btn-note-toggle{display:flex;align-items:center;gap:6px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.03em}
+.btn-info-link{display:flex;align-items:center;gap:5px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:500;text-decoration:none;transition:all .2s}
+.btn-info-link:hover{color:var(--accent2);border-color:var(--accent2)}gap:6px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.03em}
 .btn-note-toggle:hover{color:var(--accent2);border-color:var(--accent2);background:rgba(74,173,232,.08)}
 .home-hero{padding:32px 0 36px}
 .home-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,7vw,3.2rem);line-height:1.1;margin-bottom:12px}
