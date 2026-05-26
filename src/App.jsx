@@ -9,7 +9,7 @@ const KEYS  = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const KEYS_IT = ["Do","Do#","Re","Re#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
 const MODES = ["Maj","min","Dom7","min7","Maj7","sus2","sus4"];
 const FREE_LIMIT = 1;
-const FREE_SONGS_LIMIT = 20;
+const FREE_SONGS_LIMIT = 6;
 
 // Converti chiave inglese → italiana e viceversa
 function displayKey(key, useItalian) {
@@ -415,14 +415,18 @@ function HistoryModal({ setlist, onUpdate, onClose }) {
 }
 
 // ── LIBRARY ───────────────────────────────────────────────────────────────────
-function Library({ library, onUpdate, onClose, onAddToSetlist }) {
+function Library({ library, onUpdate, onClose, onAddToSetlist, isPro }) {
   const [search,setSearch]=useState("");
   const [filterTag,setFilterTag]=useState(null);
   const [editId,setEditId]=useState(null);
   const [viewingPDF,setViewingPDF]=useState(null);
+  const [libWarning,setLibWarning]=useState(false);
   const fileRefs=useRef({});
   const filtered=library.filter(s=>s.title.toLowerCase().includes(search.toLowerCase())&&(!filterTag||s.tags?.includes(filterTag)));
-  const addSong=()=>{const s={...defaultLibSong(),title:"Nuovo brano"};onUpdate([...library,s]);setEditId(s.id);};
+  const addSong=()=>{
+    if(!isPro&&library.length>=FREE_SONGS_LIMIT){setLibWarning(true);return;}
+    const s={...defaultLibSong(),title:"Nuovo brano"};onUpdate([...library,s]);setEditId(s.id);
+  };
   const updateSong=u=>onUpdate(library.map(s=>s.id===u.id?u:s));
   const deleteSong=id=>onUpdate(library.filter(s=>s.id!==id));
   const usedTags=[...new Set(library.flatMap(s=>s.tags||[]))];
@@ -442,6 +446,21 @@ function Library({ library, onUpdate, onClose, onAddToSetlist }) {
           </div>
           <button className="btn-add-lib" onClick={addSong}><IcPlus size={16}/> Nuovo</button>
         </div>
+        {libWarning&&(
+          <div className="limit-banner" style={{margin:"0 20px 12px"}}>
+            <div className="limit-banner-left">
+              <span className="limit-banner-icon">🔒</span>
+              <div className="limit-banner-text">
+                <span className="limit-banner-title">Limite piano Free raggiunto</span>
+                <span className="limit-banner-sub">Max {FREE_SONGS_LIMIT} brani in libreria. Passa a PRO per illimitati.</span>
+              </div>
+            </div>
+            <div className="limit-banner-right">
+              <button className="limit-banner-pro">PRO — €4,99</button>
+              <button className="limit-banner-close" onClick={()=>setLibWarning(false)}>×</button>
+            </div>
+          </div>
+        )}
         {usedTags.length>0&&(
           <div className="lib-tag-filter">
             <button className={`tag-filter-btn${!filterTag?" active":""}`} onClick={()=>setFilterTag(null)}>Tutti</button>
@@ -515,7 +534,7 @@ const IcMp3 = ({size=18}) => (
   </svg>
 );
 
-function MP3Player({ song, onUpdate }) {
+function MP3Player({ song, onUpdate, isPro }) {
   const audioRef = useRef(null);
   const fileRef  = useRef(null);
   const [playing, setPlaying] = useState(false);
@@ -539,6 +558,15 @@ function MP3Player({ song, onUpdate }) {
   };
 
   const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,"0")}`;
+
+  // Piano Free — mostra blocco PRO
+  if (!isPro) return (
+    <div className="mp3-player mp3-locked">
+      <IcMp3 size={14}/>
+      <span className="mp3-name">MP3 disponibile nel piano PRO</span>
+      <span className="mp3-pro-badge">🔒 PRO</span>
+    </div>
+  );
 
   return (
     <div className="mp3-player">
@@ -626,7 +654,7 @@ function SongRow({ song, index, onUpdate, onDelete, onOpenPDF, isPro, onShowProB
         <div className="song-notes">
           <TagPicker selected={song.tags||[]} onChange={tags=>onUpdate({...song,tags})}/>
           <textarea value={song.notes} rows={2} onChange={e=>onUpdate({...song,notes:e.target.value})} placeholder="Note, intro, accordatura speciale…"/>
-          <MP3Player song={song} onUpdate={onUpdate}/>
+          <MP3Player song={song} onUpdate={onUpdate} isPro={isPro}/>
           {song.pdfName&&(
             <div className="pdf-badge">
               <IcPDF/><span>{song.pdfName}</span>
@@ -818,7 +846,7 @@ function UpgradeModal({ onClose }) {
         <button className="modal-close" onClick={onClose}><IcX/></button>
         <div className="modal-icon"><IcStar size={36}/></div>
         <h2>Passa a <span className="pro-label">PRO</span></h2>
-        <p>Hai raggiunto il limite del piano gratuito.</p>
+        <p>Sblocca tutto il potenziale di SetlistPro e porta la tua musica al livello successivo.</p>
         <ul className="pro-features">
           <li>✓ Scalette illimitate</li>
           <li>✓ Brani illimitati per scaletta</li>
@@ -829,7 +857,7 @@ function UpgradeModal({ onClose }) {
           <li>✓ Backup cloud multi-dispositivo</li>
           <li>✓ Tutti gli aggiornamenti futuri</li>
         </ul>
-        <div className="pro-price">€39,99 <span>una tantum</span></div>
+        <div className="pro-price">€4,99 <span>una tantum</span></div>
         <button className="btn-upgrade">Acquista PRO lifetime</button>
         <p className="modal-note">Demo: il pagamento non è ancora attivo.</p>
       </div>
@@ -880,7 +908,7 @@ function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, is
   return (
     <div className="editor-page">
       {viewingPDF&&<PDFViewer song={viewingPDF} onClose={()=>setViewingPDF(null)}/>}
-      {showLib&&<Library library={library} onUpdate={onUpdateLibrary} onClose={()=>setShowLib(false)} onAddToSetlist={s=>{addFromLibrary(s);setShowLib(false);}}/>}
+      {showLib&&<Library library={library} onUpdate={onUpdateLibrary} onClose={()=>setShowLib(false)} onAddToSetlist={s=>{addFromLibrary(s);setShowLib(false);}} isPro={isPro}/>}
       {showHistory&&<HistoryModal setlist={setlist} onUpdate={onUpdate} onClose={()=>setShowHistory(false)}/>}
       {showTranspose&&<TransposeModal setlist={setlist} onUpdate={onUpdate} onClose={()=>setShowTranspose(false)}/>}
       {showShare&&<ShareModal setlist={setlist} onClose={()=>setShowShare(false)}/>}
@@ -917,11 +945,17 @@ function SetlistEditor({ setlist, onUpdate, onBack, library, onUpdateLibrary, is
 
       {limitWarning&&(
         <div className="limit-banner">
-          <span>🔒 Funzione PRO: scalette illimitate, PDF spartiti, e molto altro.</span>
-          <button className="limit-banner-pro" onClick={()=>{setLimitWarning(false);/* apri upgrade */}}>
-            Passa a PRO — €39,99 lifetime
-          </button>
-          <button className="limit-banner-close" onClick={()=>setLimitWarning(false)}>×</button>
+          <div className="limit-banner-left">
+            <span className="limit-banner-icon">🔒</span>
+            <div className="limit-banner-text">
+              <span className="limit-banner-title">Hai raggiunto il limite del piano Free</span>
+              <span className="limit-banner-sub">Passa a PRO per scalette illimitate, PDF spartiti, MP3 e molto altro.</span>
+            </div>
+          </div>
+          <div className="limit-banner-right">
+            <button className="limit-banner-pro">PRO — €39,99 lifetime</button>
+            <button className="limit-banner-close" onClick={()=>setLimitWarning(false)}>×</button>
+          </div>
         </div>
       )}
 
@@ -975,7 +1009,7 @@ export default function App() {
         <SharedView setlist={sharedSetlist} onDismiss={()=>setSharedSetlist(null)}/>
       ):(
         <div className="app">
-          {showLibGlobal&&<Library library={library} onUpdate={updateLibrary} onClose={()=>setShowLibGlobal(false)}/>}
+          {showLibGlobal&&<Library library={library} onUpdate={updateLibrary} onClose={()=>setShowLibGlobal(false)} isPro={isPro}/>}
           {active?(
             <SetlistEditor setlist={active} onUpdate={updateSetlist} onBack={()=>setActiveId(null)}
               library={library} onUpdateLibrary={updateLibrary} isPro={isPro} 
@@ -1285,13 +1319,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .mp3-play-btn:hover{opacity:.85}
 .mp3-time{font-size:.75rem;color:var(--muted);white-space:nowrap}
 .mp3-progress{width:100%;accent-color:#a78bfa;cursor:pointer}
-display:flex;align-items:center;gap:12px;background:rgba(232,200,74,.1);border:1px solid rgba(232,200,74,.35);border-radius:12px;padding:12px 16px;margin-bottom:16px;flex-wrap:wrap}
-.limit-banner span{flex:1;font-size:.85rem;color:var(--accent);min-width:180px}
-.limit-banner-pro{background:var(--accent);color:#0d0f14;border:none;border-radius:8px;padding:7px 14px;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap}
-.limit-banner-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:0 4px;line-height:1}
+.mp3-locked{opacity:.6;cursor:default;flex-direction:row;align-items:center}
+.mp3-pro-badge{background:rgba(232,200,74,.15);color:var(--accent);border:1px solid rgba(232,200,74,.3);border-radius:10px;padding:2px 8px;font-size:.72rem;font-weight:700;margin-left:auto;white-space:nowrap}
+.limit-banner{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,rgba(232,200,74,.08),rgba(232,200,74,.04));border:1px solid rgba(232,200,74,.25);border-radius:14px;padding:16px 20px;margin-bottom:16px;gap:16px;flex-wrap:wrap}
+.limit-banner-left{display:flex;align-items:center;gap:14px;flex:1;min-width:200px}
+.limit-banner-icon{font-size:1.4rem;flex-shrink:0}
+.limit-banner-text{display:flex;flex-direction:column;gap:3px}
+.limit-banner-title{font-size:.9rem;font-weight:600;color:var(--text)}
+.limit-banner-sub{font-size:.78rem;color:var(--muted);line-height:1.4}
+.limit-banner-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.limit-banner-pro{background:var(--accent);color:#0d0f14;border:none;border-radius:10px;padding:10px 18px;font-size:.85rem;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+.limit-banner-pro:hover{opacity:.88}
+.limit-banner-close{background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 6px;line-height:1;border-radius:6px;transition:color .2s}
 .limit-banner-close:hover{color:var(--text)}
-text-align:left;padding:28px}
-.transpose-header{display:flex;align-items:center;gap:10px;color:var(--accent2);margin-bottom:6px}
+.transpose-modal{max-width:460px;text-align:left;padding:28px}
 .transpose-header h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--text)}
 .transpose-sub{color:var(--muted);font-size:.85rem;margin-bottom:20px}
 .transpose-control{display:flex;align-items:center;gap:16px;justify-content:center;margin-bottom:10px}
