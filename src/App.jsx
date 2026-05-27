@@ -1015,11 +1015,12 @@ export default function App() {
               library={library} onUpdateLibrary={updateLibrary} isPro={isPro} 
               useItalian={useItalian} onToggleItalian={()=>setUseItalian(v=>!v)}/>
           ):(
-            <>
+            <>href="https://setlistpro-landing.vercel.app"
               <header className="app-header">
                 <div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div>
                 <div className="header-right">
-                  <a className="btn-info-link" href="/landing/" target="_blank" rel="noopener">ℹ️ Info</a>
+                  <a className="btn-info-link" href="/landing/
+                  " target="_blank" rel="noopener">ℹ️ Info</a>
                   <button className="btn-note-toggle" onClick={()=>setUseItalian(v=>!v)} title="Cambia notazione">
                     {useItalian ? "Do Re Mi" : "C D E"}
                   </button>
