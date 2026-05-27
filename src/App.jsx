@@ -1019,7 +1019,7 @@ export default function App() {
               <header className="app-header">
                 <div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div>
                 <div className="header-right">
-                  <a className="btn-info-link" href="/landing/
+                  <a className="btn-info-link" href="https://setlistpro-landing.vercel.app"
                   " target="_blank" rel="noopener">ℹ️ Info</a>
                   <button className="btn-note-toggle" onClick={()=>setUseItalian(v=>!v)} title="Cambia notazione">
                     {useItalian ? "Do Re Mi" : "C D E"}
