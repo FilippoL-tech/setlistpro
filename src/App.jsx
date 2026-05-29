@@ -1015,7 +1015,7 @@ export default function App() {
               library={library} onUpdateLibrary={updateLibrary} isPro={isPro} 
               useItalian={useItalian} onToggleItalian={()=>setUseItalian(v=>!v)}/>
           ):(
-            <>href="https://setlistpro-landing.vercel.app"
+            <>
               <header className="app-header">
                 <div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div>
                 <div className="header-right">
@@ -1082,8 +1082,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .header-right{display:flex;align-items:center;gap:10px}
 .btn-pro-badge{display:flex;align-items:center;gap:6px;background:rgba(232,200,74,.12);color:var(--accent);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer}
 .btn-info-link{display:flex;align-items:center;gap:5px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:500;text-decoration:none;transition:all .2s}
-.btn-info-link:hover{color:var(--accent2);border-color:var(--accent2)}gap:6px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.03em}
-.btn-note-toggle:hover{color:var(--accent2);border-color:var(--accent2);background:rgba(74,173,232,.08)}
+.btn-info-link:hover{color:var(--accent2);border-color:var(--accent2)}
+.btn-note-toggle{display:flex;align-items:center;gap:6px;background:var(--surface);color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.03em}
+.btn-note-toggle:hover{color:var(--accent2);border-color:var(--accent2);background:var(--surface)}
 .home-hero{padding:32px 0 36px}
 .home-hero h1{font-family:'Playfair Display',serif;font-size:clamp(2rem,7vw,3.2rem);line-height:1.1;margin-bottom:12px}
 .home-hero p{color:var(--muted);font-size:1rem;max-width:420px;line-height:1.6}
