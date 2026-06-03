@@ -123,10 +123,10 @@ export default function Auth({ onLogin }) {
           )}
         </div>
 
-        <p style={styles.note}>
-          Continuando accetti i nostri termini di servizio.<br/>
-          Supporto: <a href="mailto:supportosetlistpro@gmail.com" style={{color:"#4aade8"}}>supportosetlistpro@gmail.com</a>
-        </p>
+<p style={styles.note}>
+  Continuando accetti i nostri <a href="/termini.html" target="_blank" rel="noopener" style={{color:"#4aade8"}}>Termini di Servizio</a> e l'<a href="/privacy.html" target="_blank" rel="noopener" style={{color:"#4aade8"}}>Informativa Privacy</a>.<br/>
+  Supporto: <a href="mailto:supportosetlistpro@gmail.com" style={{color:"#4aade8"}}>supportosetlistpro@gmail.com</a>
+</p>
       </div>
     </div>
   );

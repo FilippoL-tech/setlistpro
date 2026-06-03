@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informativa sulla Privacy — SetlistPro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0d0f14; --surface:#1c2030; --border:#2a2f3d;
+    --text:#e8e8f0; --muted:#7a7f96; --accent:#e8c84a; --accent2:#4aade8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans',sans-serif; line-height:1.7;
+    padding:0 20px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto}
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:40px;flex-wrap:wrap;gap:12px;
+  }
+  .logo{font-family:'Playfair Display',serif;font-size:1.4rem}
+  .logo b{color:var(--accent)}
+  .back{color:var(--accent2);text-decoration:none;font-size:.9rem}
+  .back:hover{text-decoration:underline}
+  h1{font-family:'Playfair Display',serif;font-size:2.2rem;margin-bottom:8px}
+  .updated{color:var(--muted);font-size:.85rem;margin-bottom:36px}
+  h2{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--accent);margin:34px 0 12px}
+  p,li{color:#cdd0dc;font-size:.97rem;margin-bottom:12px}
+  ul{padding-left:22px;margin-bottom:12px}
+  a{color:var(--accent2)}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem}
+  th,td{border:1px solid var(--border);padding:10px 12px;text-align:left;vertical-align:top}
+  th{background:var(--surface);color:var(--text)}
+  td{color:#cdd0dc}
+  .box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin:18px 0}
+  footer{margin-top:50px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem;text-align:center}
+  footer a{color:var(--accent2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">Setlist<b>Pro</b></div>
+    <a class="back" href="/">← Torna all'app</a>
+  </header>
+
+  <h1>Informativa sulla Privacy</h1>
+  <p class="updated">Ultimo aggiornamento: giugno 2026</p>
+
+  <p>La presente informativa descrive come SetlistPro tratta i tuoi dati personali, in conformità al Regolamento UE 2016/679 (GDPR).</p>
+
+  <h2>1. Titolare del trattamento</h2>
+  <p>Il titolare del trattamento è <strong>Filippo Latella</strong>, contattabile all'indirizzo <a href="mailto:supportosetlistpro@gmail.com">supportosetlistpro@gmail.com</a>.</p>
+
+  <h2>2. Dati che raccogliamo</h2>
+  <ul>
+    <li><strong>Dati dell'account:</strong> indirizzo email e password (quest'ultima conservata in forma cifrata).</li>
+    <li><strong>Contenuti che inserisci:</strong> scalette, titoli dei brani, tonalità, BPM, note ed eventuali file allegati.</li>
+    <li><strong>Dati di pagamento:</strong> in caso di acquisto del piano PRO, i dati della carta sono raccolti e gestiti direttamente da Stripe; noi riceviamo solo la conferma dell'avvenuto pagamento associata alla tua email.</li>
+    <li><strong>Dati tecnici:</strong> informazioni minime necessarie al funzionamento (ad es. token di sessione conservati localmente nel tuo browser).</li>
+  </ul>
+
+  <h2>3. Finalità e base giuridica</h2>
+  <table>
+    <tr><th>Finalità</th><th>Base giuridica</th></tr>
+    <tr><td>Creazione e gestione dell'account, erogazione del servizio</td><td>Esecuzione del contratto</td></tr>
+    <tr><td>Gestione dei pagamenti del piano PRO</td><td>Esecuzione del contratto</td></tr>
+    <tr><td>Assistenza e risposta alle richieste di supporto</td><td>Esecuzione del contratto / legittimo interesse</td></tr>
+    <tr><td>Adempimenti di legge</td><td>Obbligo legale</td></tr>
+  </table>
+
+  <h2>4. Fornitori che trattano i dati per nostro conto</h2>
+  <p>Per erogare il servizio ci avvaliamo di fornitori terzi affidabili, che agiscono come responsabili del trattamento:</p>
+  <ul>
+    <li><strong>Supabase</strong> — autenticazione e database. I dati sono ospitati su server situati nell'Unione Europea (Francoforte, Germania).</li>
+    <li><strong>Stripe</strong> — elaborazione dei pagamenti.</li>
+    <li><strong>Vercel</strong> — hosting dell'applicazione web.</li>
+  </ul>
+  <p>Non vendiamo né cediamo i tuoi dati personali a terzi per finalità di marketing.</p>
+
+  <h2>5. Conservazione dei dati</h2>
+  <p>Conserviamo i tuoi dati per il tempo necessario a fornirti il servizio e finché mantieni attivo l'account. Puoi richiedere la cancellazione del tuo account e dei dati associati in qualsiasi momento scrivendoci.</p>
+
+  <h2>6. I tuoi diritti</h2>
+  <p>In qualità di interessato hai diritto di:</p>
+  <ul>
+    <li>accedere ai tuoi dati e ottenerne copia;</li>
+    <li>chiederne la rettifica o l'aggiornamento;</li>
+    <li>chiederne la cancellazione;</li>
+    <li>limitarne o opporti al trattamento;</li>
+    <li>ottenere la portabilità dei dati.</li>
+  </ul>
+  <div class="box">
+    <p>Per esercitare i tuoi diritti scrivi a <a href="mailto:supportosetlistpro@gmail.com">supportosetlistpro@gmail.com</a>. Hai inoltre il diritto di proporre reclamo all'autorità di controllo competente (in Italia, il <strong>Garante per la protezione dei dati personali</strong>).</p>
+  </div>
+
+  <h2>7. Cookie e archiviazione locale</h2>
+  <p>SetlistPro non utilizza cookie a fini pubblicitari o di profilazione. Utilizziamo l'archiviazione locale del browser (localStorage) e i token di sessione esclusivamente per finalità tecniche e di autenticazione, necessarie al funzionamento del servizio.</p>
+
+  <h2>8. Modifiche all'informativa</h2>
+  <p>Potremmo aggiornare questa informativa nel tempo. Le modifiche saranno pubblicate su questa pagina con la relativa data di aggiornamento.</p>
+
+  <footer>
+    SetlistPro · <a href="/termini.html">Termini di Servizio</a> · <a href="mailto:supportosetlistpro@gmail.com">Supporto</a><br>
+    © 2026 Filippo Latella
+  </footer>
+</div>
+</body>
+</html>
