@@ -21,6 +21,17 @@ export async function POST(request) {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
+
+    // Ignora i checkout di altri prodotti/app nello stesso account Stripe:
+    // agiamo solo sulle sessioni etichettate come SetlistPro.
+    if (session.metadata?.app !== "setlistpro") {
+      console.log("Evento ignorato: non è un acquisto SetlistPro");
+      return new Response(JSON.stringify({ received: true, ignored: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const email =
       session.client_reference_id ||
       session.customer_email ||
