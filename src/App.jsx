@@ -251,8 +251,18 @@ function SharedView({setlist,onDismiss}){
   return(<div className="app"><header className="app-header"><div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div><span className="shared-badge">👁 Sola lettura</span></header><div className="shared-hero"><h1>{setlist.name}</h1><div className="shared-meta"><span>📅 {setlist.date}</span>{setlist.venue&&<span>📍 {setlist.venue}</span>}<span>🎵 {setlist.songs.length} brani</span></div></div><div className="songs-list">{setlist.songs.map((s,i)=>(<div key={s.id} className="song-row"><div className="song-main"><span className="song-num">{i+1}</span><div className="song-title-col"><span className="song-title" style={{cursor:"default"}}>{s.title}</span>{s.tags?.length>0&&<div className="song-inline-tags">{s.tags.map(t=><TagPill key={t} tagId={t}/>)}</div>}</div><div className="song-meta" style={{pointerEvents:"none"}}><span className="shared-key">{s.key} {s.mode}</span><span className="shared-bpm">{s.bpm} BPM</span><span className="shared-dur">{s.duration}</span></div></div>{s.notes&&<div className="song-notes" style={{paddingTop:8}}><p style={{fontSize:".82rem",color:"var(--muted)"}}>{s.notes}</p></div>}</div>))}</div><div className="shared-footer"><p>Vuoi creare le tue scalette?</p><button className="btn-upgrade" style={{marginTop:8}} onClick={onDismiss}>Prova SetlistPro gratis</button></div></div>);
 }
 
-function UpgradeModal({onClose}){
-  return(<div className="modal-overlay" onClick={onClose}><div className="modal-box" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={onClose}><IcX/></button><div className="modal-icon"><IcStar size={36}/></div><h2>Passa a <span className="pro-label">PRO</span></h2><p>Sblocca tutto il potenziale di SetlistPro e porta la tua musica al livello successivo.</p><ul className="pro-features"><li>✓ Scalette illimitate</li><li>✓ Brani illimitati per scaletta</li><li>✓ PDF spartiti allegabili</li><li>✓ MP3 basi musicali</li><li>✓ Modalità palco completa</li><li>✓ Metronomo, Libreria, Storico live</li><li>✓ Backup cloud multi-dispositivo</li><li>✓ Tutti gli aggiornamenti futuri</li></ul><div className="pro-price">€4,99 <span>una tantum — promo lancio</span></div><button className="btn-upgrade">Acquista PRO lifetime</button><p className="modal-note">Il pagamento sarà attivo a breve.</p></div></div>);
+function UpgradeModal({onClose,userEmail}){
+  const [loading,setLoading]=useState(false);
+  const startCheckout=async()=>{
+    setLoading(true);
+    try{
+      const res=await fetch("/api/create-checkout-session",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:userEmail})});
+      const data=await res.json();
+      if(data.url){window.location.href=data.url;}
+      else{alert("Errore nel checkout: "+(data.error||"riprova"));setLoading(false);}
+    }catch(e){alert("Errore di rete: "+e.message);setLoading(false);}
+  };
+  return(<div className="modal-overlay" onClick={onClose}><div className="modal-box" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={onClose}><IcX/></button><div className="modal-icon"><IcStar size={36}/></div><h2>Passa a <span className="pro-label">PRO</span></h2><p>Sblocca tutto il potenziale di SetlistPro e porta la tua musica al livello successivo.</p><ul className="pro-features"><li>✓ Scalette illimitate</li><li>✓ Brani illimitati per scaletta</li><li>✓ PDF spartiti allegabili</li><li>✓ MP3 basi musicali</li><li>✓ Modalità palco completa</li><li>✓ Metronomo, Libreria, Storico live</li><li>✓ Backup cloud multi-dispositivo</li><li>✓ Tutti gli aggiornamenti futuri</li></ul><div className="pro-price">€4,99 <span>una tantum — promo lancio</span></div><button className="btn-upgrade" onClick={startCheckout} disabled={loading}>{loading?"Attendere…":"Acquista PRO lifetime"}</button><p className="modal-note">Pagamento sicuro tramite Stripe.</p></div></div>);
 }
 
 // ── SETLIST EDITOR ────────────────────────────────────────────────────────────
@@ -352,6 +362,24 @@ const handleLogout = async () => {
   useEffect(()=>{saveData(data);},[data]);
   useEffect(()=>{try{localStorage.setItem("setlist_notation",useItalian?"it":"en");}catch{}},[useItalian]);
 
+  // Dopo il ritorno da Stripe Checkout: ricontrolla lo stato PRO (il webhook è asincrono, può servire qualche secondo)
+  useEffect(()=>{
+    const params=new URLSearchParams(window.location.search);
+    if(params.get("checkout")==="success" && user?.email){
+      let tries=0;
+      const poll=setInterval(async()=>{
+        tries++;
+        const pro=await fetchIsPro(user.email);
+        if(pro||tries>=6){
+          setIsPro(pro);
+          clearInterval(poll);
+          window.history.replaceState({},"",window.location.pathname);
+        }
+      },2000);
+      return ()=>clearInterval(poll);
+    }
+  },[user]);
+
   const setlists=data.setlists,library=data.library||[];
   const updateSetlist=u=>setData(d=>({...d,setlists:d.setlists.map(s=>s.id===u.id?u:s)}));
   const updateLibrary=l=>setData(d=>({...d,library:l}));
@@ -411,7 +439,7 @@ const handleLogout = async () => {
               </div>
             </>
           )}
-          {showUpgrade&&<UpgradeModal onClose={()=>setShowUpgrade(false)}/>}
+          {showUpgrade&&<UpgradeModal onClose={()=>setShowUpgrade(false)} userEmail={user?.email}/>}
         </div>
       )}
     </>
