@@ -121,6 +121,7 @@ const IcRight   =()=><Ic d="M5 12h14M12 19l7-7-7-7"/>;
 const IcPlay    =({size=18})=><Ic size={size} d="M5 3l14 9-14 9V3z"/>;
 const IcPause   =({size=18})=><Ic size={size} d="M6 4h4v16H6zM14 4h4v16h-4z"/>;
 const IcStage   =({size=18})=><Ic size={size} d="M2 20h20M4 20V10l8-7 8 7v10M10 20v-6h4v6"/>;
+const IcUser    =({size=18})=><Ic size={size} d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>;
 const IcMetro   =({size=18})=><Ic size={size} d="M6 21L9.5 3h5L18 21z M4 21h16 M12 21l3-13 M12.3 15l2.4-1"/>;
 const IcSkipR   =({size=18})=><Ic size={size} d="M5 4l10 8-10 8V4zM19 5v14"/>;
 const IcSkipL   =({size=18})=><Ic size={size} d="M19 20L9 12l10-8v16zM5 19V5"/>;
@@ -265,6 +266,41 @@ function UpgradeModal({onClose,userEmail}){
   return(<div className="modal-overlay" onClick={onClose}><div className="modal-box" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={onClose}><IcX/></button><div className="modal-icon"><IcStar size={36}/></div><h2>Passa a <span className="pro-label">PRO</span></h2><p>Sblocca tutto il potenziale di SetlistPro e porta la tua musica al livello successivo.</p><ul className="pro-features"><li>✓ Scalette illimitate</li><li>✓ Brani illimitati per scaletta</li><li>✓ PDF spartiti allegabili</li><li>✓ MP3 basi musicali</li><li>✓ Modalità palco completa</li><li>✓ Metronomo, Libreria, Storico live</li><li>✓ Backup cloud multi-dispositivo</li><li>✓ Tutti gli aggiornamenti futuri</li></ul><div className="pro-price">€4,99 <span>una tantum — promo lancio</span></div><button className="btn-upgrade" onClick={startCheckout} disabled={loading}>{loading?"Attendere…":"Acquista PRO lifetime"}</button><p className="modal-note">Pagamento sicuro tramite Stripe.</p></div></div>);
 }
 
+function ProfileModal({user,isPro,onClose,onLogout}){
+  const [pw,setPw]=useState(""),[pw2,setPw2]=useState("");
+  const [loading,setLoading]=useState(false),[msg,setMsg]=useState(null),[err,setErr]=useState(null);
+  const memberSince=user?.created_at?new Date(user.created_at).toLocaleDateString("it-IT"):null;
+  const changePassword=async()=>{
+    setErr(null);setMsg(null);
+    if(pw.length<6){setErr("La password deve avere almeno 6 caratteri.");return;}
+    if(pw!==pw2){setErr("Le due password non coincidono.");return;}
+    setLoading(true);
+    const {error}=await supabase.auth.updateUser({password:pw});
+    setLoading(false);
+    if(error){setErr(error.message);}
+    else{setMsg("Password aggiornata con successo.");setPw("");setPw2("");}
+  };
+  return(<div className="modal-overlay" onClick={onClose}><div className="modal-box profile-modal" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={onClose}><IcX/></button>
+    <div className="modal-icon"><IcUser size={36}/></div>
+    <h2>Il tuo profilo</h2>
+    <div className="profile-info">
+      <div className="profile-row"><span className="profile-label">Email</span><span className="profile-value">{user?.email}</span></div>
+      <div className="profile-row"><span className="profile-label">Piano</span><span className={`profile-plan${isPro?" pro":""}`}>{isPro?"PRO Lifetime":"Free"}</span></div>
+      {memberSince&&<div className="profile-row"><span className="profile-label">Membro dal</span><span className="profile-value">{memberSince}</span></div>}
+    </div>
+    <div className="profile-divider"/>
+    <div className="profile-section">
+      <h3>Cambia password</h3>
+      <input className="profile-input" type="password" value={pw} onChange={e=>setPw(e.target.value)} placeholder="Nuova password" autoComplete="new-password"/>
+      <input className="profile-input" type="password" value={pw2} onChange={e=>setPw2(e.target.value)} placeholder="Conferma nuova password" autoComplete="new-password"/>
+      {err&&<div className="profile-msg err">⚠️ {err}</div>}
+      {msg&&<div className="profile-msg ok">✅ {msg}</div>}
+      <button className="btn-upgrade" onClick={changePassword} disabled={loading} style={{marginTop:8}}>{loading?"Attendere…":"Aggiorna password"}</button>
+    </div>
+    <button className="profile-logout" onClick={onLogout}>Esci dall'account</button>
+  </div></div>);
+}
+
 // ── SETLIST EDITOR ────────────────────────────────────────────────────────────
 function SetlistEditor({setlist,onUpdate,onBack,library,onUpdateLibrary,isPro,useItalian,onToggleItalian}){
   const [dragIdx,setDragIdx]=useState(null),[overIdx,setOverIdx]=useState(null),[viewingPDF,setViewingPDF]=useState(null),[stageMode,setStageMode]=useState(false),[showMetro,setShowMetro]=useState(false),[showLib,setShowLib]=useState(false),[showHistory,setShowHistory]=useState(false),[showTranspose,setShowTranspose]=useState(false),[showShare,setShowShare]=useState(false),[showPrint,setShowPrint]=useState(false),[limitWarning,setLimitWarning]=useState(false);
@@ -290,6 +326,7 @@ export default function App() {
   const [activeId,setActiveId]=useState(null);
   const [showUpgrade,setShowUpgrade]=useState(false);
   const [showLibGlobal,setShowLibGlobal]=useState(false);
+  const [showProfile,setShowProfile]=useState(false);
   const [sharedSetlist]=useState(()=>parseSharedSetlist());
   const [useItalian,setUseItalian]=useState(()=>{try{return localStorage.getItem("setlist_notation")==="it";}catch{return false;}});
 
@@ -426,6 +463,7 @@ const handleLogout = async () => {
                   <button className="btn-note-toggle" onClick={()=>setUseItalian(v=>!v)}>{useItalian?"Do Re Mi":"C D E"}</button>
                   <button className="btn-icon-label" onClick={()=>setShowLibGlobal(true)}><IcBook size={15}/> Libreria <span className="lib-count">{library.length}</span></button>
                   {!isPro&&<button className="btn-pro-badge" onClick={()=>setShowUpgrade(true)}><IcStar size={13}/> Free {setlists.length}/{FREE_LIMIT}</button>}
+                  <button className="btn-icon-label" onClick={()=>setShowProfile(true)}><IcUser size={15}/> Profilo</button>
                   <button onClick={handleLogout} style={{background:"none",border:"1px solid #2a2f3d",color:"#7a7f96",borderRadius:"20px",padding:"6px 14px",fontSize:".8rem",cursor:"pointer"}}>Esci</button>
                 </div>
               </header>
@@ -440,6 +478,7 @@ const handleLogout = async () => {
             </>
           )}
           {showUpgrade&&<UpgradeModal onClose={()=>setShowUpgrade(false)} userEmail={user?.email}/>}
+          {showProfile&&<ProfileModal user={user} isPro={isPro} onClose={()=>setShowProfile(false)} onLogout={handleLogout}/>}
         </div>
       )}
     </>
@@ -696,6 +735,23 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .pro-price span{font-size:1rem;color:var(--muted)}
 .btn-upgrade{width:100%;padding:14px;background:var(--accent);color:#0d0f14;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer}
 .modal-note{font-size:.75rem;color:var(--muted);margin-top:12px}
+.profile-modal{text-align:left;max-width:420px}
+.profile-modal .modal-icon,.profile-modal h2{text-align:center}
+.profile-info{display:flex;flex-direction:column;gap:10px;margin:8px 0 4px}
+.profile-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:.9rem}
+.profile-label{color:var(--muted);font-size:.82rem}
+.profile-value{color:var(--text);font-weight:500;word-break:break-all;text-align:right}
+.profile-plan{font-weight:700;color:var(--muted)}
+.profile-plan.pro{color:var(--accent)}
+.profile-divider{height:1px;background:var(--border);margin:18px 0}
+.profile-section h3{font-size:1rem;margin-bottom:10px;color:var(--text);font-family:'Playfair Display',serif}
+.profile-input{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:10px;padding:11px 14px;font-size:.92rem;outline:none;margin-bottom:8px}
+.profile-input:focus{border-color:var(--accent)}
+.profile-msg{border-radius:8px;padding:9px 12px;font-size:.82rem;margin-bottom:6px}
+.profile-msg.err{background:rgba(232,96,74,.1);border:1px solid rgba(232,96,74,.3);color:var(--danger)}
+.profile-msg.ok{background:rgba(74,232,122,.1);border:1px solid rgba(74,232,122,.3);color:var(--green)}
+.profile-logout{width:100%;margin-top:16px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:11px;font-size:.88rem;cursor:pointer;transition:all .2s}
+.profile-logout:hover{border-color:var(--danger);color:var(--danger)}
 .print-modal-overlay{z-index:500}
 .print-modal-box{max-width:700px;width:calc(100% - 24px);text-align:left;padding:28px;max-height:88vh;overflow-y:auto}
 .pm-header{margin-bottom:20px;padding-bottom:14px;border-bottom:3px solid var(--accent)}
