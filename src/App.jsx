@@ -368,6 +368,10 @@ useEffect(()=>{
     }else{
       setIsPro(false);
     }
+    // Quando l'utente arriva da un link di reset password, apri direttamente l'area Profilo
+    if(event === "PASSWORD_RECOVERY"){
+      setShowProfile(true);
+    }
   });
 
   return ()=>{
