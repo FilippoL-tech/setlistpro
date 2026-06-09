@@ -46,6 +46,15 @@ export default function Auth({ onLogin }) {
           <span style={styles.logoText}>Setlist<b style={{color:"#e8c84a"}}>Pro</b></span>
         </div>
 
+        <a
+          href="https://setlistpro-landing.vercel.app"
+          target="_blank"
+          rel="noopener"
+          style={styles.infoLink}
+        >
+          ℹ️ Scopri cosa fa SetlistPro →
+        </a>
+
         <h2 style={styles.title}>
           {mode === "login" && "Bentornato!"}
           {mode === "register" && "Crea il tuo account"}
@@ -166,6 +175,14 @@ const styles = {
     fontFamily: "'Playfair Display', serif",
     fontSize: "1.4rem",
     color: "#e8e8f0",
+  },
+  infoLink: {
+    fontSize: ".85rem",
+    color: "#4aade8",
+    textDecoration: "none",
+    alignSelf: "flex-start",
+    fontWeight: 500,
+    marginTop: "-12px",
   },
   title: {
     fontFamily: "'Playfair Display', serif",
