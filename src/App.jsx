@@ -270,6 +270,7 @@ function UpgradeModal({onClose,userEmail}){
 function ProfileModal({user,isPro,onClose,onLogout}){
   const [pw,setPw]=useState(""),[pw2,setPw2]=useState("");
   const [loading,setLoading]=useState(false),[msg,setMsg]=useState(null),[err,setErr]=useState(null);
+  const [confirmDelete,setConfirmDelete]=useState(false),[deleteText,setDeleteText]=useState(""),[deletingLoading,setDeletingLoading]=useState(false),[deleteError,setDeleteError]=useState(null);
   const memberSince=user?.created_at?new Date(user.created_at).toLocaleDateString("it-IT"):null;
   const changePassword=async()=>{
     setErr(null);setMsg(null);
@@ -280,6 +281,26 @@ function ProfileModal({user,isPro,onClose,onLogout}){
     setLoading(false);
     if(error){setErr(error.message);}
     else{setMsg("Password aggiornata con successo.");setPw("");setPw2("");}
+  };
+  const deleteAccount=async()=>{
+    if(deleteText!=="ELIMINA"){setDeleteError("Devi scrivere ELIMINA per confermare.");return;}
+    setDeletingLoading(true);setDeleteError(null);
+    try{
+      const {data:{session}}=await supabase.auth.getSession();
+      const token=session?.access_token;
+      if(!token) throw new Error("Sessione scaduta, rifai login.");
+      const res=await fetch("/api/delete-account",{method:"POST",headers:{Authorization:`Bearer ${token}`}});
+      const data=await res.json();
+      if(!res.ok) throw new Error(data.error||"Errore durante l'eliminazione");
+      // Pulizia dati locali (scalette, libreria, sessione)
+      try{
+        localStorage.removeItem("setlist_manager_v3");
+        localStorage.removeItem("setlist_notation");
+        Object.keys(localStorage).filter(k=>k.startsWith("sb-")).forEach(k=>localStorage.removeItem(k));
+      }catch{}
+      await supabase.auth.signOut().catch(()=>{});
+      window.location.href=window.location.pathname;
+    }catch(e){setDeleteError(e.message);setDeletingLoading(false);}
   };
   return(<div className="modal-overlay" onClick={onClose}><div className="modal-box profile-modal" onClick={e=>e.stopPropagation()}><button className="modal-close" onClick={onClose}><IcX/></button>
     <div className="modal-icon"><IcUser size={36}/></div>
@@ -297,6 +318,23 @@ function ProfileModal({user,isPro,onClose,onLogout}){
       {err&&<div className="profile-msg err">⚠️ {err}</div>}
       {msg&&<div className="profile-msg ok">✅ {msg}</div>}
       <button className="btn-upgrade" onClick={changePassword} disabled={loading} style={{marginTop:8}}>{loading?"Attendere…":"Aggiorna password"}</button>
+    </div>
+    <div className="profile-divider"/>
+    <div className="profile-section">
+      <h3 style={{color:"var(--danger)"}}>⚠️ Zona pericolosa</h3>
+      {!confirmDelete ? (<>
+        <p style={{color:"var(--muted)",fontSize:".82rem",marginBottom:"10px",lineHeight:1.5}}>Elimina definitivamente il tuo account e i dati a esso associati. Operazione irreversibile.</p>
+        <button className="profile-delete-btn" onClick={()=>setConfirmDelete(true)}>Elimina il mio account</button>
+      </>) : (<>
+        <p style={{color:"var(--text)",fontSize:".82rem",marginBottom:"10px",lineHeight:1.5}}>Verranno cancellati: <b>account</b>, <b>scalette/libreria locali</b>, <b>stato PRO</b>. Le ricevute Stripe restano per ragioni fiscali. Se sei PRO, dovrai ricomprare per riaverlo.</p>
+        <p style={{color:"var(--muted)",fontSize:".8rem",marginBottom:"6px"}}>Scrivi <b>ELIMINA</b> per confermare:</p>
+        <input className="profile-input" value={deleteText} onChange={e=>setDeleteText(e.target.value)} placeholder="ELIMINA" autoComplete="off"/>
+        {deleteError&&<div className="profile-msg err">⚠️ {deleteError}</div>}
+        <div style={{display:"flex",gap:8,marginTop:8}}>
+          <button className="btn-cancel" onClick={()=>{setConfirmDelete(false);setDeleteText("");setDeleteError(null);}} disabled={deletingLoading} style={{flex:1}}>Annulla</button>
+          <button className="profile-delete-final" onClick={deleteAccount} disabled={deletingLoading||deleteText!=="ELIMINA"}>{deletingLoading?"Eliminazione…":"Elimina definitivamente"}</button>
+        </div>
+      </>)}
     </div>
     <button className="profile-logout" onClick={onLogout}>Esci dall'account</button>
   </div></div>);
@@ -757,6 +795,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .profile-msg.ok{background:rgba(74,232,122,.1);border:1px solid rgba(74,232,122,.3);color:var(--green)}
 .profile-logout{width:100%;margin-top:16px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:11px;font-size:.88rem;cursor:pointer;transition:all .2s}
 .profile-logout:hover{border-color:var(--danger);color:var(--danger)}
+.profile-delete-btn{width:100%;background:none;border:1px solid var(--danger);color:var(--danger);border-radius:10px;padding:11px;font-size:.88rem;cursor:pointer;transition:all .2s;font-weight:600}
+.profile-delete-btn:hover{background:rgba(232,96,74,.1)}
+.profile-delete-final{flex:1;background:var(--danger);border:none;color:#fff;border-radius:10px;padding:11px;font-size:.88rem;cursor:pointer;font-weight:700;transition:opacity .2s}
+.profile-delete-final:disabled{opacity:.4;cursor:not-allowed}
+.profile-delete-final:not(:disabled):hover{opacity:.88}
 .print-modal-overlay{z-index:500}
 .print-modal-box{max-width:700px;width:calc(100% - 24px);text-align:left;padding:28px;max-height:88vh;overflow-y:auto}
 .pm-header{margin-bottom:20px;padding-bottom:14px;border-bottom:3px solid var(--accent)}
