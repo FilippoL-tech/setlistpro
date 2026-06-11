@@ -502,7 +502,7 @@ const handleLogout = async () => {
               <header className="app-header">
                 <div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div>
                 <div className="header-right">
-                  <a className="btn-info-link" href="https://setlistpro-landing.vercel.app" target="_blank" rel="noopener">ℹ️ Info</a>
+                  <a className="btn-info-link" href="https://setlistpro.it" target="_blank" rel="noopener">ℹ️ Info</a>
                   <button className="btn-note-toggle" onClick={()=>setUseItalian(v=>!v)}>{useItalian?"Do Re Mi":"C D E"}</button>
                   <button className="btn-icon-label" onClick={()=>setShowLibGlobal(true)}><IcBook size={15}/> Libreria <span className="lib-count">{library.length}</span></button>
                   {!isPro&&<button className="btn-pro-badge" onClick={()=>setShowUpgrade(true)}><IcStar size={13}/> Free {setlists.length}/{FREE_LIMIT}</button>}

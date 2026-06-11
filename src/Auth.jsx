@@ -47,7 +47,7 @@ export default function Auth({ onLogin }) {
         </div>
 
         <a
-          href="https://setlistpro-landing.vercel.app"
+          href="https://setlistpro.it"
           target="_blank"
           rel="noopener"
           style={styles.infoLink}
