@@ -480,7 +480,7 @@ const handleLogout = async () => {
 
   if(!user)return(
     <>
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');`}</style>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Oswald:wght@500;600;700&display=swap');`}</style>
       <Auth onLogin={handleLogin}/>
     </>
   );
@@ -529,14 +529,14 @@ const handleLogout = async () => {
 }
 
 const CSS=`
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Oswald:wght@500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d0f14;--surface:#161920;--card:#1c2030;--border:#2a2f3d;--accent:#e8c84a;--accent2:#4aade8;--danger:#e8604a;--green:#4ae87a;--text:#e8e8f0;--muted:#7a7f96;--radius:14px}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 .app{max-width:800px;margin:0 auto;padding:0 16px 80px}
 .app-header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 12px;flex-wrap:wrap;gap:8px}
-.logo{display:flex;align-items:center;gap:10px;font-family:'Playfair Display',serif;font-size:1.5rem}
-.logo b{color:var(--accent)}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:600;text-transform:uppercase;letter-spacing:2px}
+.logo b{color:var(--accent);font-weight:700}
 .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .btn-pro-badge{display:flex;align-items:center;gap:6px;background:rgba(232,200,74,.12);color:var(--accent);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer}
 .lib-count{background:rgba(74,173,232,.2);color:var(--accent2);border-radius:10px;padding:1px 7px;font-size:.75rem;font-weight:700}

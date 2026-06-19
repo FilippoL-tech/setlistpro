@@ -1,6 +1,36 @@
 import { useState } from "react";
 import { supabase } from "./supabase";
 
+/* Sfondo "palco" ambra fisso — puro CSS, nessun asset */
+function StageBg() {
+  const bars = Array.from({ length: 28 });
+  return (
+    <div className="slp-stage" aria-hidden="true">
+      <div className="slp-vignette" />
+      <div className="slp-spot" />
+      <div className="slp-rim" />
+      <div className="slp-beam" />
+      <div className="slp-eq">
+        {bars.map((_, i) => {
+          const c = Math.abs(i - 14);
+          const peak = 1 - c / 20;
+          return (
+            <span
+              key={i}
+              className="slp-eqbar"
+              style={{
+                "--peak": Math.max(0.18, peak).toFixed(2),
+                animationDelay: `${(i % 7) * 0.18}s`,
+                animationDuration: `${2.2 + (i % 5) * 0.4}s`,
+              }}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Auth({ onLogin }) {
   const [mode, setMode] = useState("login"); // login | register | reset
   const [email, setEmail] = useState("");
@@ -37,13 +67,16 @@ export default function Auth({ onLogin }) {
 
   return (
     <div style={styles.overlay}>
+      <style>{STAGE_CSS}</style>
+      <StageBg />
+
       <div style={styles.card}>
         {/* Logo */}
         <div style={styles.logo}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e8c84a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#e8c84a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
           </svg>
-          <span style={styles.logoText}>Setlist<b style={{color:"#e8c84a"}}>Pro</b></span>
+          <span style={styles.logoText}>Setlist<b style={{color:"#e8c84a",fontWeight:700}}>Pro</b></span>
         </div>
 
         <a
@@ -132,19 +165,37 @@ export default function Auth({ onLogin }) {
           )}
         </div>
 
-<p style={styles.note}>
-  Continuando accetti i nostri <a href="/termini.html" target="_blank" rel="noopener" style={{color:"#4aade8"}}>Termini di Servizio</a> e l'<a href="/privacy.html" target="_blank" rel="noopener" style={{color:"#4aade8"}}>Informativa Privacy</a>.<br/>
-  Supporto: <a href="mailto:supportosetlistpro@gmail.com" style={{color:"#4aade8"}}>supportosetlistpro@gmail.com</a>
-</p>
+        <p style={styles.note}>
+          Continuando accetti i nostri <a href="/termini.html" target="_blank" rel="noopener" style={{color:"#4aade8"}}>Termini di Servizio</a> e l'<a href="/privacy.html" target="_blank" rel="noopener" style={{color:"#4aade8"}}>Informativa Privacy</a>.<br/>
+          Supporto: <a href="mailto:supportosetlistpro@gmail.com" style={{color:"#4aade8"}}>supportosetlistpro@gmail.com</a>
+        </p>
       </div>
     </div>
   );
 }
 
+/* CSS dello sfondo palco (ambra fisso) */
+const STAGE_CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&display=swap');
+.slp-stage{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(120% 90% at 50% -10%, #101830 0%, #080B14 60%);}
+.slp-vignette{position:absolute;inset:0;background:radial-gradient(110% 110% at 50% 45%, transparent 55%, rgba(0,0,0,.65) 100%);}
+.slp-spot{position:absolute;left:50%;top:-22%;width:120vmin;height:120vmin;transform:translateX(-50%);background:radial-gradient(closest-side, rgba(255,226,172,.30) 0%, rgba(244,182,92,.16) 32%, transparent 70%);filter:blur(8px);animation:slpBreath 9s ease-in-out infinite;}
+.slp-rim{position:absolute;left:-15%;bottom:-25%;width:80vmin;height:80vmin;background:radial-gradient(closest-side, rgba(110,81,168,.22) 0%, transparent 70%);filter:blur(10px);animation:slpGlow 11s ease-in-out infinite;}
+.slp-beam{position:absolute;left:50%;top:-30%;width:64vmin;height:130vmin;transform:translateX(-50%);background:linear-gradient(to bottom, rgba(255,226,172,.16) 0%, transparent 70%);clip-path:polygon(40% 0, 60% 0, 90% 100%, 10% 100%);filter:blur(6px);}
+.slp-eq{position:absolute;left:0;right:0;bottom:0;height:24vmin;display:flex;align-items:flex-end;justify-content:center;gap:1.1vmin;padding:0 4vmin;opacity:.5;-webkit-mask-image:linear-gradient(to top,#000 10%,transparent 95%);mask-image:linear-gradient(to top,#000 10%,transparent 95%);}
+.slp-eqbar{flex:1 1 auto;max-width:14px;height:calc(22vmin * var(--peak,.5));border-radius:6px 6px 0 0;background:linear-gradient(to top, transparent, #e8c84a);transform-origin:bottom;transform:scaleY(.25);animation:slpEq ease-in-out infinite alternate;}
+@keyframes slpEq{from{transform:scaleY(.22);}to{transform:scaleY(1);}}
+@keyframes slpBreath{0%,100%{opacity:.85;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.04);}}
+@keyframes slpGlow{0%,100%{opacity:.85;}50%{opacity:1;}}
+@media (prefers-reduced-motion: reduce){.slp-eqbar,.slp-spot,.slp-rim{animation:none !important;}.slp-eqbar{transform:scaleY(var(--peak,.5));}}
+`;
+
 const styles = {
   overlay: {
+    position: "relative",
     minHeight: "100vh",
-    background: "#0d0f14",
+    background: "#080B14",
+    overflow: "hidden",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -152,8 +203,12 @@ const styles = {
     fontFamily: "'DM Sans', sans-serif",
   },
   card: {
-    background: "#1c2030",
-    border: "1px solid #2a2f3d",
+    position: "relative",
+    zIndex: 2,
+    background: "rgba(20,26,40,.66)",
+    border: "1px solid rgba(232,200,74,.22)",
+    backdropFilter: "blur(14px)",
+    WebkitBackdropFilter: "blur(14px)",
     borderRadius: "20px",
     padding: "40px 36px",
     width: "100%",
@@ -161,20 +216,22 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "20px",
+    boxShadow: "0 30px 80px -30px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.05)",
   },
   logo: {
     display: "flex",
     alignItems: "center",
     gap: "10px",
-    fontFamily: "'Playfair Display', serif",
-    fontSize: "1.4rem",
-    color: "#e8e8f0",
     marginBottom: "4px",
   },
   logoText: {
-    fontFamily: "'Playfair Display', serif",
-    fontSize: "1.4rem",
+    fontFamily: "'Oswald', sans-serif",
+    fontSize: "1.9rem",
+    fontWeight: 600,
+    textTransform: "uppercase",
+    letterSpacing: "2px",
     color: "#e8e8f0",
+    lineHeight: 1,
   },
   infoLink: {
     fontSize: ".85rem",
@@ -191,7 +248,7 @@ const styles = {
     margin: 0,
   },
   sub: {
-    color: "#7a7f96",
+    color: "#9aa3b8",
     fontSize: ".9rem",
     lineHeight: 1.6,
     margin: 0,
@@ -208,14 +265,14 @@ const styles = {
   },
   label: {
     fontSize: ".82rem",
-    color: "#7a7f96",
+    color: "#9aa3b8",
     fontWeight: 600,
     letterSpacing: ".05em",
     textTransform: "uppercase",
   },
   input: {
-    background: "#161920",
-    border: "1px solid #2a2f3d",
+    background: "rgba(8,11,20,.55)",
+    border: "1px solid rgba(122,127,150,.3)",
     borderRadius: "10px",
     padding: "12px 14px",
     color: "#e8e8f0",
@@ -224,28 +281,29 @@ const styles = {
     transition: "border-color .2s",
   },
   btnPrimary: {
-    background: "#e8c84a",
-    color: "#0d0f14",
+    background: "linear-gradient(180deg, #ffdf9f, #e8c84a)",
+    color: "#1a1206",
     border: "none",
     borderRadius: "10px",
     padding: "14px",
     fontSize: "1rem",
     fontWeight: 700,
     cursor: "pointer",
-    transition: "opacity .2s",
+    transition: "opacity .2s, transform .12s",
     marginTop: "4px",
+    boxShadow: "0 10px 30px -10px rgba(232,200,74,.5)",
   },
   error: {
-    background: "rgba(232,96,74,.1)",
-    border: "1px solid rgba(232,96,74,.3)",
+    background: "rgba(232,96,74,.12)",
+    border: "1px solid rgba(232,96,74,.35)",
     borderRadius: "8px",
     padding: "10px 14px",
     color: "#e8604a",
     fontSize: ".85rem",
   },
   successMsg: {
-    background: "rgba(74,232,122,.1)",
-    border: "1px solid rgba(74,232,122,.3)",
+    background: "rgba(74,232,122,.12)",
+    border: "1px solid rgba(74,232,122,.35)",
     borderRadius: "8px",
     padding: "10px 14px",
     color: "#4ae87a",
