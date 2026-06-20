@@ -251,7 +251,7 @@ function ShareModal({setlist,onClose}){
 }
 
 function SharedView({setlist,onDismiss}){
-  return(<div className="app"><header className="app-header"><div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div><span className="shared-badge">👁 Sola lettura</span></header><div className="shared-hero"><h1>{setlist.name}</h1><div className="shared-meta"><span>📅 {setlist.date}</span>{setlist.venue&&<span>📍 {setlist.venue}</span>}<span>🎵 {setlist.songs.length} brani</span></div></div><div className="songs-list">{setlist.songs.map((s,i)=>(<div key={s.id} className="song-row"><div className="song-main"><span className="song-num">{i+1}</span><div className="song-title-col"><span className="song-title" style={{cursor:"default"}}>{s.title}</span>{s.tags?.length>0&&<div className="song-inline-tags">{s.tags.map(t=><TagPill key={t} tagId={t}/>)}</div>}</div><div className="song-meta" style={{pointerEvents:"none"}}><span className="shared-key">{s.key} {s.mode}</span><span className="shared-bpm">{s.bpm} BPM</span><span className="shared-dur">{s.duration}</span></div></div>{s.notes&&<div className="song-notes" style={{paddingTop:8}}><p style={{fontSize:".82rem",color:"var(--muted)"}}>{s.notes}</p></div>}</div>))}</div><div className="shared-footer"><p>Vuoi creare le tue scalette?</p><button className="btn-upgrade" style={{marginTop:8}} onClick={onDismiss}>Prova SetlistPro gratis</button></div></div>);
+  return(<div className="app"><header className="app-header"><div className="logo"><span className="logo-set">Setlist</span><b>Pro</b></div><span className="shared-badge">👁 Sola lettura</span></header><div className="shared-hero"><h1>{setlist.name}</h1><div className="shared-meta"><span>📅 {setlist.date}</span>{setlist.venue&&<span>📍 {setlist.venue}</span>}<span>🎵 {setlist.songs.length} brani</span></div></div><div className="songs-list">{setlist.songs.map((s,i)=>(<div key={s.id} className="song-row"><div className="song-main"><span className="song-num">{i+1}</span><div className="song-title-col"><span className="song-title" style={{cursor:"default"}}>{s.title}</span>{s.tags?.length>0&&<div className="song-inline-tags">{s.tags.map(t=><TagPill key={t} tagId={t}/>)}</div>}</div><div className="song-meta" style={{pointerEvents:"none"}}><span className="shared-key">{s.key} {s.mode}</span><span className="shared-bpm">{s.bpm} BPM</span><span className="shared-dur">{s.duration}</span></div></div>{s.notes&&<div className="song-notes" style={{paddingTop:8}}><p style={{fontSize:".82rem",color:"var(--muted)"}}>{s.notes}</p></div>}</div>))}</div><div className="shared-footer"><p>Vuoi creare le tue scalette?</p><button className="btn-upgrade" style={{marginTop:8}} onClick={onDismiss}>Prova SetlistPro gratis</button></div></div>);
 }
 
 function UpgradeModal({onClose,userEmail}){
@@ -509,7 +509,7 @@ const handleLogout = async () => {
           ):(
             <>
               <header className="app-header">
-                <div className="logo"><IcMusic size={26}/><span>Setlist<b>Pro</b></span></div>
+                <div className="logo"><span className="logo-set">Setlist</span><b>Pro</b></div>
                 <div className="header-right">
                   <a className="btn-info-link" href="https://setlistpro.it" target="_blank" rel="noopener">ℹ️ Info</a>
                   <button className="btn-note-toggle" onClick={()=>setUseItalian(v=>!v)}>{useItalian?"Do Re Mi":"C D E"}</button>
@@ -545,8 +545,9 @@ const CSS=`
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
 .app{max-width:800px;margin:0 auto;padding:0 16px 80px}
 .app-header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 12px;flex-wrap:wrap;gap:8px}
-.logo{display:flex;align-items:center;gap:10px;font-family:'Oswald',sans-serif;font-size:1.5rem;font-weight:600;text-transform:uppercase;letter-spacing:2px}
-.logo b{color:var(--accent);font-weight:700}
+.logo{display:flex;align-items:baseline;gap:1px;font-size:1.5rem;text-transform:uppercase;letter-spacing:1.5px}
+.logo-set{font-family:'Playfair Display',serif;font-weight:500;color:var(--text)}
+.logo b{font-family:'Oswald',sans-serif;color:var(--accent);font-weight:700}
 .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .btn-pro-badge{display:flex;align-items:center;gap:6px;background:rgba(232,200,74,.12);color:var(--accent);border:1px solid rgba(232,200,74,.3);border-radius:20px;padding:6px 14px;font-size:.8rem;font-weight:600;cursor:pointer}
 .lib-count{background:rgba(74,173,232,.2);color:var(--accent2);border-radius:10px;padding:1px 7px;font-size:.75rem;font-weight:700}

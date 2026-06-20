@@ -31,6 +31,33 @@ function StageBg() {
   );
 }
 
+/* Logo completo: onda ciano + wordmark + tagline */
+function BrandLogo() {
+  const lines = Array.from({ length: 18 });
+  return (
+    <div className="slp-brand">
+      <svg className="slp-brand-wave" viewBox="0 0 700 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs><linearGradient id="slpwave" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#a5f3fc"/><stop offset="50%" stopColor="#22d3ee"/><stop offset="100%" stopColor="#2dd4bf"/>
+        </linearGradient></defs>
+        {lines.map((_, i) => {
+          const t = i / (lines.length - 1), amp = 150 * (0.06 + 0.23 * t), phase = t * 2.5, yoff = 150 * 0.52 + (t - 0.5) * 150 * 0.05;
+          let d = "M";
+          for (let x = 0; x <= 700; x += 10) {
+            const env = Math.exp(-Math.pow((x - 350) / 200, 2));
+            const y = yoff + Math.sin(x * 0.017 + phase) * amp * (0.16 + env * 0.95) - env * 150 * 0.22 * t;
+            d += (x === 0 ? "" : "L") + x + " " + y.toFixed(1) + " ";
+          }
+          const op = (0.22 + 0.65 * (1 - Math.abs(t - 0.5) * 1.5)).toFixed(2);
+          return <path key={i} d={d} fill="none" stroke="url(#slpwave)" strokeWidth="1" opacity={op} />;
+        })}
+      </svg>
+      <div className="slp-brand-wm"><span className="s">Setlist</span><b>Pro</b></div>
+      <div className="slp-brand-tag"><span className="ln" /><span>L'app italiana per musicisti live</span><span className="ln" /></div>
+    </div>
+  );
+}
+
 export default function Auth({ onLogin }) {
   const [mode, setMode] = useState("login"); // login | register | reset
   const [email, setEmail] = useState("");
@@ -72,12 +99,7 @@ export default function Auth({ onLogin }) {
 
       <div style={styles.card}>
         {/* Logo */}
-        <div style={styles.logo}>
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#e8c84a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
-          </svg>
-          <span style={styles.logoText}>Setlist<b style={{color:"#e8c84a",fontWeight:700}}>Pro</b></span>
-        </div>
+        <BrandLogo />
 
         <a
           href="https://setlistpro.it"
@@ -188,6 +210,13 @@ const STAGE_CSS = `
 @keyframes slpBreath{0%,100%{opacity:.85;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.04);}}
 @keyframes slpGlow{0%,100%{opacity:.85;}50%{opacity:1;}}
 @media (prefers-reduced-motion: reduce){.slp-eqbar,.slp-spot,.slp-rim{animation:none !important;}.slp-eqbar{transform:scaleY(var(--peak,.5));}}
+.slp-brand{display:flex;flex-direction:column;align-items:center;margin-bottom:4px;}
+.slp-brand-wave{width:min(280px,78%);height:auto;display:block;margin-bottom:2px;}
+.slp-brand-wm{display:flex;align-items:baseline;line-height:1;text-transform:uppercase;letter-spacing:.04em;}
+.slp-brand-wm .s{font-family:'Playfair Display',serif;font-weight:500;font-size:2.3rem;color:#f4f1ea;}
+.slp-brand-wm b{font-family:'Oswald',sans-serif;font-weight:700;font-size:2.3rem;color:#e8c84a;}
+.slp-brand-tag{display:flex;align-items:center;gap:9px;margin-top:10px;text-transform:uppercase;letter-spacing:.2em;font-size:.58rem;color:#cfd4e2;white-space:nowrap;}
+.slp-brand-tag .ln{width:20px;height:1px;background:#22d3ee;}
 `;
 
 const styles = {
