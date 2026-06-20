@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
 import Auth from "./Auth";
-import ReviewsButton from "./Reviews";
+import ReviewsButton, { ReviewsPage } from "./Reviews";
 
 const STORAGE_KEY = "setlist_manager_v3";
 function loadData() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
@@ -368,6 +368,7 @@ export default function App() {
   const [showLibGlobal,setShowLibGlobal]=useState(false);
   const [showProfile,setShowProfile]=useState(false);
   const [sharedSetlist]=useState(()=>parseSharedSetlist());
+  const [publicReviews]=useState(()=>new URLSearchParams(window.location.search).has("recensioni"));
   const [useItalian,setUseItalian]=useState(()=>{try{return localStorage.getItem("setlist_notation")==="it";}catch{return false;}});
 
   // Funzione per controllare PRO — ritorna true/false
@@ -477,6 +478,13 @@ const handleLogout = async () => {
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{width:36,height:36,border:"3px solid #2a2f3d",borderTopColor:"#e8c84a",borderRadius:"50%",animation:"spin .8s linear infinite"}}/>
     </div>
+  );
+
+  if(publicReviews)return(
+    <>
+      <style>{CSS}</style>
+      <ReviewsPage user={user}/>
+    </>
   );
 
   if(!user)return(
