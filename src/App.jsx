@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
 import Auth from "./Auth";
+import ReviewsButton from "./Reviews";
 
 const STORAGE_KEY = "setlist_manager_v3";
 function loadData() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
@@ -518,6 +519,7 @@ const handleLogout = async () => {
                 {setlists.map(sl=>(<div key={sl.id} className="setlist-card" onClick={()=>setActiveId(sl.id)}><div className="card-top"><IcList/><button className="btn-icon btn-delete card-del" onClick={e=>{e.stopPropagation();deleteSetlist(sl.id);}}><IcTrash/></button></div><h3>{sl.name}</h3><div className="card-meta"><span>📅 {sl.date}</span>{sl.venue&&<span>📍 {sl.venue}</span>}</div><div className="card-footer"><span>{sl.songs.length} brani</span><div style={{display:"flex",alignItems:"center",gap:6}}>{sl.history?.length>0&&<span className="card-history-badge"><IcHistory size={11}/> {sl.history.length}</span>}<span className="card-arrow"><IcChevR/></span></div></div></div>))}
                 <button className="setlist-card card-new" onClick={createSetlist}><IcPlus size={32}/><span>Nuova scaletta</span></button>
               </div>
+              <ReviewsButton user={user}/>
             </>
           )}
           {showUpgrade&&<UpgradeModal onClose={()=>setShowUpgrade(false)} userEmail={user?.email}/>}
