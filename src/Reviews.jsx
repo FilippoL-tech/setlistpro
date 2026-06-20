@@ -185,7 +185,7 @@ export function ReviewsPage({ user }) {
     <div className="app">
       <style>{CSS}</style>
       <header className="app-header">
-        <div className="logo"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e8c84a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg><span>Setlist<b>Pro</b></span></div>
+        <div className="logo"><span className="logo-set">Setlist</span><b>Pro</b></div>
         <button className="rv-btn rv-btn-sm" onClick={home}>Apri l'app</button>
       </header>
 
