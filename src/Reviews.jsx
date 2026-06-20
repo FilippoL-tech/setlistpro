@@ -141,6 +141,33 @@ function ReviewList({ reviews, mineId }) {
   );
 }
 
+/* Logo completo (onda + wordmark + tagline) per la pagina pubblica */
+function BrandLogo() {
+  const lines = Array.from({ length: 18 });
+  return (
+    <div className="rvb">
+      <svg className="rvb-wave" viewBox="0 0 700 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <defs><linearGradient id="rvbwave" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#a5f3fc"/><stop offset="50%" stopColor="#22d3ee"/><stop offset="100%" stopColor="#2dd4bf"/>
+        </linearGradient></defs>
+        {lines.map((_, i) => {
+          const t = i / (lines.length - 1), amp = 150 * (0.06 + 0.23 * t), phase = t * 2.5, yoff = 150 * 0.52 + (t - 0.5) * 150 * 0.05;
+          let d = "M";
+          for (let x = 0; x <= 700; x += 10) {
+            const env = Math.exp(-Math.pow((x - 350) / 200, 2));
+            const y = yoff + Math.sin(x * 0.017 + phase) * amp * (0.16 + env * 0.95) - env * 150 * 0.22 * t;
+            d += (x === 0 ? "" : "L") + x + " " + y.toFixed(1) + " ";
+          }
+          const op = (0.22 + 0.65 * (1 - Math.abs(t - 0.5) * 1.5)).toFixed(2);
+          return <path key={i} d={d} fill="none" stroke="url(#rvbwave)" strokeWidth="1" opacity={op} />;
+        })}
+      </svg>
+      <div className="rvb-wm"><span className="s">Setlist</span><b>Pro</b></div>
+      <div className="rvb-tag"><span className="ln" /><span>L'app italiana per musicisti live</span><span className="ln" /></div>
+    </div>
+  );
+}
+
 /* ========== 1) Banner + modale per la HOME (utente loggato) ========== */
 export default function ReviewsButton({ user }) {
   const { reviews, loading, count, avg, dist, mine, load } = useReviews(user);
@@ -190,7 +217,7 @@ export function ReviewsPage({ user }) {
       </header>
 
       <div className="rvp-hero">
-        <h1>Dicono di SetlistPro</h1>
+        <BrandLogo />
         <p>Il parere dei musicisti che la usano sul palco.</p>
       </div>
 
@@ -276,9 +303,15 @@ const CSS = `
 .rv-item-date{color:var(--muted);font-size:.75rem;white-space:nowrap;}
 .rv-item-text{margin:6px 0 0;color:#c9cfe0;line-height:1.55;font-size:.92rem;white-space:pre-wrap;}
 /* pagina pubblica */
-.rvp-hero{padding:24px 0 20px;}
-.rvp-hero h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,6vw,2.6rem);margin-bottom:8px;}
-.rvp-hero p{color:var(--muted);}
+.rvp-hero{padding:18px 0 22px;text-align:center;}
+.rvp-hero p{color:var(--muted);margin-top:16px;}
+.rvb{display:flex;flex-direction:column;align-items:center;}
+.rvb-wave{width:min(320px,72%);height:auto;display:block;}
+.rvb-wm{display:flex;align-items:baseline;line-height:1;text-transform:uppercase;letter-spacing:.04em;margin-top:2px;}
+.rvb-wm .s{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(2rem,7vw,2.8rem);color:#f4f1ea;}
+.rvb-wm b{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,7vw,2.8rem);color:#e8c84a;}
+.rvb-tag{display:flex;align-items:center;gap:10px;margin-top:9px;text-transform:uppercase;letter-spacing:.2em;font-size:clamp(.52rem,1.6vw,.68rem);color:#cfd4e2;white-space:nowrap;}
+.rvb-tag .ln{width:clamp(16px,4vw,30px);height:1px;background:#22d3ee;}
 .rvp-body{max-width:620px;}
 .rvp-write{width:100%;margin-bottom:22px;}
 .rvp-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(135deg, rgba(232,200,74,.10), rgba(232,200,74,.02));border:1px solid rgba(232,200,74,.28);border-radius:var(--radius,14px);padding:18px 20px;margin-bottom:24px;}
