@@ -222,6 +222,7 @@ export function ReviewsPage({ user }) {
       </div>
 
       <div className="rvp-body">
+        <div className="rvp-sep" />
         <Summary count={count} avg={avg} dist={dist} />
 
         {/* Banner scrittura: solo registrati */}
@@ -313,6 +314,7 @@ const CSS = `
 .rvb-tag{display:flex;align-items:center;gap:10px;margin-top:9px;text-transform:uppercase;letter-spacing:.2em;font-size:clamp(.52rem,1.6vw,.68rem);color:#cfd4e2;white-space:nowrap;}
 .rvb-tag .ln{width:clamp(16px,4vw,30px);height:1px;background:#22d3ee;}
 .rvp-body{max-width:620px;}
+.rvp-sep{height:1px;background:linear-gradient(to right,transparent,rgba(34,211,238,.35) 50%,transparent);margin:0 0 26px;}
 .rvp-write{width:100%;margin-bottom:22px;}
 .rvp-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(135deg, rgba(232,200,74,.10), rgba(232,200,74,.02));border:1px solid rgba(232,200,74,.28);border-radius:var(--radius,14px);padding:18px 20px;margin-bottom:24px;}
 .rvp-footer{text-align:center;padding:28px 0 8px;color:var(--muted);border-top:1px solid var(--border);margin-top:26px;}
