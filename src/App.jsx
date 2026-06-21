@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
 import Auth from "./Auth";
 import ReviewsButton, { ReviewsPage } from "./Reviews";
+import { claimSession, heartbeatSession, releaseSession } from "./deviceSession";
 
 const STORAGE_KEY = "setlist_manager_v3";
 function loadData() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
@@ -361,6 +362,7 @@ function SetlistEditor({setlist,onUpdate,onBack,library,onUpdateLibrary,isPro,us
 export default function App() {
   const [data,setData]=useState(()=>{const s=loadData();return s||{setlists:[defaultSetlist()],library:[]};});
   const [user,setUser]=useState(null);
+  const [sessionEvicted,setSessionEvicted]=useState(false);
   const [isPro,setIsPro]=useState(false);
   const [loadingAuth,setLoadingAuth]=useState(true);
   const [activeId,setActiveId]=useState(null);
@@ -420,6 +422,18 @@ useEffect(()=>{
   };
 },[]);
 
+  // Limite dispositivi: rivendica lo slot al login e controlla col battito
+  useEffect(()=>{
+    if(!user) return;
+    let stopped=false;
+    claimSession(user.id);
+    const iv=setInterval(async()=>{
+      const ok=await heartbeatSession(user.id);
+      if(!ok && !stopped){ stopped=true; clearInterval(iv); setSessionEvicted(true); }
+    },45000);
+    return ()=>{ stopped=true; clearInterval(iv); };
+  },[user]);
+
   const handleLogin=async(loggedUser)=>{
     setUser(loggedUser);
     const pro = await fetchIsPro(loggedUser.email);
@@ -428,6 +442,7 @@ useEffect(()=>{
 
 const handleLogout = async () => {
   try {
+    if (user) await releaseSession(user.id);
     await supabase.auth.signOut();
   } catch (e) {
     console.error("Logout error:", e);
@@ -492,6 +507,17 @@ const handleLogout = async () => {
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=Oswald:wght@500;600;700&display=swap');`}</style>
       <Auth onLogin={handleLogin}/>
     </>
+  );
+
+  if(sessionEvicted)return(
+    <div style={{minHeight:"100vh",background:"#0d0f14",color:"#e8e8f0",display:"flex",alignItems:"center",justifyContent:"center",padding:24,fontFamily:"'DM Sans',sans-serif"}}>
+      <div style={{maxWidth:380,textAlign:"center"}}>
+        <div style={{fontSize:40,marginBottom:14}}>📱</div>
+        <h2 style={{fontFamily:"'Playfair Display',serif",margin:"0 0 10px",fontSize:"1.5rem"}}>Disconnesso</h2>
+        <p style={{color:"#9aa3b8",lineHeight:1.6,margin:"0 0 22px"}}>Questo account è in uso su troppi dispositivi. Per continuare qui, accedi di nuovo: verrà disconnesso il dispositivo usato meno di recente.</p>
+        <button onClick={handleLogout} style={{background:"linear-gradient(180deg,#ffdf9f,#e8c84a)",color:"#1a1206",border:"none",borderRadius:10,padding:"13px 24px",fontWeight:700,cursor:"pointer",fontSize:"1rem"}}>Torna al login</button>
+      </div>
+    </div>
   );
 
   return(
