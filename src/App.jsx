@@ -780,7 +780,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .lib-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;border-bottom:1px solid var(--border)}
 .lib-title{display:flex;align-items:center;gap:10px;color:var(--accent)}
 .lib-title h2{font-family:'Playfair Display',serif;font-size:1.4rem}
-.lib-toolbar{display:flex;gap:10px;padding:12px 20px;align-items:center}
+.lib-toolbar{display:flex;gap:10px;padding:12px 20px;align-items:center;flex-wrap:wrap}
 .lib-search-wrap{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px}
 .lib-search{background:none;border:none;color:var(--text);font-size:.9rem;outline:none;flex:1}
 .lib-clear{background:none;border:none;color:var(--muted);cursor:pointer;display:flex}
@@ -977,5 +977,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   .stage-song-title{font-size:clamp(1.4rem,7vw,2.4rem)}
   .editor-header-actions{gap:4px}
   .btn-icon-label{padding:6px 9px;font-size:.78rem}
+  .lib-toolbar{gap:8px}
+  .lib-search-wrap{flex-basis:100%}
+  .btn-add-lib{flex:1;justify-content:center;padding:9px 6px;font-size:.8rem;gap:5px}
 }
 `;
