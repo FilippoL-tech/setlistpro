@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
+import { loadCloudData, saveCloudDebounced } from "./cloudSync";
 import Auth from "./Auth";
 import ReviewsButton, { ReviewsPage } from "./Reviews";
 import { claimSession, heartbeatSession, releaseSession } from "./deviceSession";
 
 const STORAGE_KEY = "setlist_manager_v3";
+const DATA_OWNER_KEY = "slp_data_owner";
 function loadData() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
 function saveData(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch {} }
 function uid() { return Math.random().toString(36).slice(2, 9); }
@@ -518,6 +520,24 @@ const handleLogout = async () => {
 };
 
   useEffect(()=>{saveData(data);},[data]);
+  // Sincronizzazione cloud
+  const cloudReadyRef=useRef(false);
+  useEffect(()=>{
+    if(!user){cloudReadyRef.current=false;return;}
+    let cancelled=false;
+    const local=loadData()||{setlists:[],library:[]};
+    let owner=null; try{owner=localStorage.getItem(DATA_OWNER_KEY);}catch{}
+    loadCloudData(user.id, local, owner).then(res=>{
+      if(cancelled)return;
+      if(res&&res.data)setData(res.data);
+      try{localStorage.setItem(DATA_OWNER_KEY,user.id);}catch{}
+      cloudReadyRef.current=true;
+    });
+    return ()=>{cancelled=true;};
+  },[user]);
+  useEffect(()=>{
+    if(user&&cloudReadyRef.current)saveCloudDebounced(user.id,data);
+  },[data,user]);
   useEffect(()=>{try{localStorage.setItem("setlist_notation",useItalian?"it":"en");}catch{}},[useItalian]);
 
   // Dopo il ritorno da Stripe Checkout: ricontrolla lo stato PRO (il webhook è asincrono, può servire qualche secondo)
