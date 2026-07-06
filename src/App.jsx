@@ -278,7 +278,7 @@ function Library({library,onUpdate,onClose,onAddToSetlist,isPro,useItalian}){
     }catch(e){setIoMsg({err:true,t:e.message||"Import fallito."});}
   };
   const filtered=library.filter(s=>s.title.toLowerCase().includes(search.toLowerCase())&&(!filterTag||s.tags?.includes(filterTag)));
-  const addSong=()=>{if(!isPro&&library.length>=FREE_LIB_LIMIT){setLibWarning(true);return;}const s={...defaultLibSong(),title:"Nuovo brano"};onUpdate([...library,s]);setEditId(s.id);};
+  const addSong=()=>{if(!isPro&&library.length>=FREE_LIB_LIMIT){setLibWarning(true);return;}const s={...defaultLibSong(),title:"Nuovo brano"};onUpdate([s,...library]);setEditId(s.id);};
   const updateSong=u=>onUpdate(library.map(s=>s.id===u.id?u:s));
   const deleteSong=id=>onUpdate(library.filter(s=>s.id!==id));
   const usedTags=[...new Set(library.flatMap(s=>s.tags||[]))];
