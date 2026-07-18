@@ -191,6 +191,7 @@ function PDFViewer({song,onClose}){
   const [pdfDoc,setPdfDoc]=useState(null),[page,setPage]=useState(1),[numPages,setNumPages]=useState(0),[loading,setLoading]=useState(true),[error,setError]=useState(null);
   useEffect(()=>{
     const load=async()=>{
+      if(!song.pdfData){setError("PDF non disponibile su questo dispositivo. Riaprilo dal dispositivo dove l'hai allegato, oppure ricaricalo qui.");setLoading(false);return;}
       if(!window.pdfjsLib){await new Promise((res,rej)=>{const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";s.onload=res;s.onerror=rej;document.head.appendChild(s);});window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";}
       try{const b64=song.pdfData.split(",")[1],bin=atob(b64),bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);const doc=await window.pdfjsLib.getDocument({data:bytes}).promise;setPdfDoc(doc);setNumPages(doc.numPages);setLoading(false);}
       catch(e){setError("Impossibile aprire: "+e.message);setLoading(false);}
