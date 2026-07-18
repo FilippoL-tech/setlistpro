@@ -4,11 +4,12 @@ import { loadCloudData, saveCloudDebounced } from "./cloudSync";
 import Auth from "./Auth";
 import ReviewsButton, { ReviewsPage } from "./Reviews";
 import { claimSession, heartbeatSession, releaseSession } from "./deviceSession";
+import { stripBytes, hydrateAttachments, persistAttachments } from "./attachmentStore";
 
 const STORAGE_KEY = "setlist_manager_v3";
 const DATA_OWNER_KEY = "slp_data_owner";
 function loadData() { try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; } }
-function saveData(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); } catch {} }
+function saveData(d) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(stripBytes(d))); } catch {} }
 function uid() { return Math.random().toString(36).slice(2, 9); }
 
 const KEYS   = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -521,19 +522,48 @@ const handleLogout = async () => {
 };
 
   useEffect(()=>{saveData(data);},[data]);
+
+  // Allegati: migrazione una-tantum da localStorage -> IndexedDB + idratazione al mount
+  const hydratedRef=useRef(false);
+  useEffect(()=>{
+    let cancelled=false;
+    (async()=>{
+      try{ await persistAttachments(data); }catch{}   // salva in IDB eventuali byte ancora in localStorage
+      let hy=data;
+      try{ hy=await hydrateAttachments(data); }catch{} // reinnesta i byte da IDB
+      if(!cancelled){ setData(hy); hydratedRef.current=true; }
+    })();
+    return ()=>{cancelled=true;};
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+  // Persistenza byte allegati su IndexedDB (dopo idratazione), con debounce
+  const idbTimerRef=useRef(null);
+  useEffect(()=>{
+    if(!hydratedRef.current)return;
+    clearTimeout(idbTimerRef.current);
+    idbTimerRef.current=setTimeout(()=>{ persistAttachments(data).catch(()=>{}); },800);
+  },[data]);
+
   // Sincronizzazione cloud
   const cloudReadyRef=useRef(false);
   useEffect(()=>{
     if(!user){cloudReadyRef.current=false;return;}
     let cancelled=false;
-    const local=loadData()||{setlists:[],library:[]};
     let owner=null; try{owner=localStorage.getItem(DATA_OWNER_KEY);}catch{}
-    loadCloudData(user.id, local, owner).then(res=>{
+    (async()=>{
+      const localMeta=loadData()||{setlists:[],library:[]};
+      let local=localMeta;
+      try{ local=await hydrateAttachments(localMeta); }catch{} // byte locali per il graft
+      const res=await loadCloudData(user.id, local, owner);
       if(cancelled)return;
-      if(res&&res.data)setData(res.data);
+      let d=(res&&res.data)?res.data:{setlists:[],library:[]};
+      try{ d=await hydrateAttachments(d); }catch{}             // reinnesta byte da IDB sul risultato
+      if(cancelled)return;
+      setData(d);
+      hydratedRef.current=true;
       try{localStorage.setItem(DATA_OWNER_KEY,user.id);}catch{}
       cloudReadyRef.current=true;
-    });
+    })();
     return ()=>{cancelled=true;};
   },[user]);
   useEffect(()=>{
